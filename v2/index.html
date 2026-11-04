@@ -54,18 +54,24 @@ button{font:inherit;color:inherit;cursor:pointer}
 /* ---------- generic agent app ---------- */
 .phone{width:280px;height:580px;border-radius:42px;background:#F6F6F7;color:#141414;border:9px solid #1E1B29;box-shadow:0 0 0 1px #2A2740,0 24px 60px rgba(28,28,46,.2);position:relative;overflow:hidden;display:flex;flex-direction:column;margin:0 auto;font-family:-apple-system,"SF Pro Text",system-ui,"Segoe UI",sans-serif}
 .p-status{display:flex;justify-content:space-between;align-items:center;padding:11px 22px 2px;font-size:13px;font-weight:600}
-.p-head{display:flex;align-items:center;gap:9px;padding:10px 14px 12px;border-bottom:1px solid #E8E8EC;flex:none}
-.agent-ic{width:30px;height:30px;border-radius:50%;background:#26233A;display:grid;place-items:center}
-.agent-ic svg{width:16px;height:16px}
-.p-head b{font-size:14px;display:block}
-.p-head span{font-size:11.5px;color:#8A8A90}
+.p-head{position:relative;height:72px;display:flex;justify-content:space-between;align-items:flex-start;padding:6px 12px 0;flex:none}
+.p-round{width:36px;height:36px;border-radius:50%;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.08);display:grid;place-items:center}
+.p-invite{background:#fff;border-radius:999px;padding:8px 13px;font-weight:600;font-size:12.5px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.p-ava{position:absolute;left:50%;top:0;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center}
+.p-ava .agent-ic{width:50px;height:50px}
+.p-ava .nm{margin-top:-9px;background:#fff;border-radius:999px;padding:3px 11px;font-weight:600;font-size:12.5px;box-shadow:0 2px 8px rgba(0,0,0,.10);position:relative}
+.agent-ic{width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 38% 32%,#FFF9F0,#ECDFCB 60%,#D3BFA2);box-shadow:0 2px 6px rgba(0,0,0,.12)}
+.p-tabs{margin:0 10px 10px;background:#fff;border-radius:24px;box-shadow:0 2px 12px rgba(0,0,0,.06);display:grid;grid-template-columns:repeat(5,1fr);padding:4px;flex:none}
+.p-tabs span{height:32px;display:grid;place-items:center;border-radius:18px;color:#141414}
+.p-tabs span.on{background:#EDEDF0}
+.p-msgs{-webkit-mask-image:linear-gradient(transparent 0,#000 26px);mask-image:linear-gradient(transparent 0,#000 26px)}
 .p-msgs{flex:1;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;gap:9px;padding:10px 12px}
 .m{font-size:13.5px;line-height:1.38;padding:10px 13px;border-radius:18px;animation:rise .7s ease both}
 .m.me{align-self:flex-end;max-width:84%;background:#141414;color:#fff}
 .m.ag{align-self:stretch;background:#EBEBEE}
 .m .opt{display:block;border:1px dashed #B5B5BC;border-radius:10px;padding:7px 10px;margin-top:7px;font-size:12.5px;background:#fff}
 .m.sys{align-self:center;background:none;padding:2px 0;color:#8A8A90;font-size:11px}
-.p-input{margin:0 10px 12px;background:#fff;border-radius:22px;min-height:44px;display:flex;align-items:center;gap:10px;padding:6px 8px 6px 14px;font-size:13.5px;box-shadow:0 2px 12px rgba(0,0,0,.06);flex:none}
+.p-input{margin:0 10px 8px;background:#fff;border-radius:22px;min-height:44px;display:flex;align-items:center;gap:10px;padding:6px 8px 6px 14px;font-size:13.5px;box-shadow:0 2px 12px rgba(0,0,0,.06);flex:none}
 .p-input .txt{flex:1;min-width:0;line-height:1.35}
 .p-input .txt.ph{color:#9A9AA2}
 .p-input .send{width:30px;height:30px;border-radius:50%;background:#141414;color:#fff;display:grid;place-items:center;flex:none}
@@ -129,7 +135,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .slider .knob svg{width:16px;height:16px}
 .cap-err{margin-top:10px;font-size:12.5px;color:var(--bad);font-weight:600;animation:fade .5s ease 3.6s both}
 .stuck{display:inline-flex;align-items:center;gap:7px;margin-top:12px;font-size:11.5px;font-weight:600;color:#3B3B46;background:#F1F1F4;border-radius:999px;padding:4px 10px 4px 5px}
-.stuck .agent-ic{width:18px;height:18px}.stuck .agent-ic svg{width:10px;height:10px}
+.stuck .agent-ic{width:18px;height:18px}
 
 .hold{position:relative;overflow:hidden;border:2px solid #1A1A1A;border-radius:999px;height:48px;display:grid;place-items:center;font-weight:700;font-size:14px;margin:4px auto 12px;width:240px;max-width:100%;background:#fff}
 .hold .fill{position:absolute;inset:0 auto 0 0;width:0;background:#1A1A1A;animation:holdfill 3s cubic-bezier(.4,0,.6,1) 2.6s forwards}
@@ -140,7 +146,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .hcard h3{font-family:var(--f-display);font-size:19px;margin:0 0 6px}
 .hcard p{font-size:13px;color:var(--faint);margin:0 0 12px;line-height:1.45}
 .hold.idle .fill{animation:none}
-.hcard .who .agent-ic{width:18px;height:18px}.hcard .who .agent-ic svg{width:10px;height:10px}
+.hcard .who .agent-ic{width:18px;height:18px}
 .hcard .who{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--purple-deep);background:var(--lav-2);border-radius:999px;padding:4px 10px;animation:fade .5s ease 2.2s both}
 .hcard .by{font-size:10.5px;color:var(--faint);margin-top:10px;font-family:var(--f-mono)}
 .veil.light{background:rgba(246,244,255,.82)}
@@ -309,32 +315,36 @@ body.embed .btns,body.embed .note{display:none}
 (function(){
 const H='<svg class="hmark"><use href="#hm"/></svg>';
 const LOGO='<svg class="hlogo" role="img" aria-label="HUMAN"><use href="#hl"/></svg>';
-const AG='<span class="agent-ic"><svg><use href="#spark"/></svg></span>';
+const AG='<span class="agent-ic"></span>';
+const ico=(d,w)=>`<svg width="${w||18}" height="${w||18}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+
 const CK='<svg viewBox="0 0 12 12"><use href="#ck"/></svg>';
 const SHOE='<svg viewBox="0 0 220 110"><use href="#shoe"/></svg>';
 const ASK='Grab the Aero Runner Low in a size 10 from Brightwell Supply when it drops.';
 const URL='brightwellsupply.com/aero-runner-low';
 
 const me={f:'me',t:ASK}, onit={f:'ag',t:'On it. Heading to Brightwell Supply now.'}, got={f:'ag',t:'Got them. Aero Runner Low, size 10, arriving Friday.'};
+const me2={f:'me',t:'Nice. Now grab the Aero Runner Gold in a 10 when the limited drop goes live Saturday.'}, onit2={f:'ag',t:'Will do. I’ll be on Brightwell Supply when it drops.'};
+const G={n:'Aero Runner Gold', pr:180, badge:'Limited release · 1 per customer'};
 
 const head=(r)=>`<div class="mh"><span class="wm"><i></i>Brightwell Supply</span><span class="sp"></span><span>New arrivals</span><span>Men</span><span>Women</span>${r||''}</div>`;
 const PAGES={
-  product:o=>`${head()}${o.banner?vbar():''}<div class="prod"><div class="art">${SHOE}</div><div><span class="badge">Limited release</span><h2>Aero Runner Low</h2><div class="sub">Men's running shoe · Teal / Amber</div><div class="price">$140</div><div class="sizes"><span>8</span><span>9</span><span class="sel">10</span><span>11</span></div><span class="cta${o.dim?' dim':''}">Add to cart</span></div></div>`,
+  product:o=>`${head()}${o.banner?vbar():''}<div class="prod"><div class="art">${SHOE}</div><div><span class="badge">${o.badge||'New release'}</span><h2>${o.n||'Aero Runner Low'}</h2><div class="sub">Men's running shoe · Teal / Amber</div><div class="price">$${o.pr||140}</div><div class="sizes"><span>8</span><span>9</span><span class="sel">10</span><span>11</span></div><span class="cta${o.dim?' dim':''}">Add to cart</span></div></div>`,
   cart:o=>`${head()}<div class="cart"><h2>Your cart</h2><div class="row"><span class="th">${SHOE}</span><span><b>Aero Runner Low</b><small>Size 10 · Teal / Amber</small></span><span class="pr">$140</span></div><span class="pill bad">Checkout never completed</span></div><div class="stamp">Lost sale</div>`,
-  cartok:o=>`${head()}${vbar('browse & add to cart: allowed')}<div class="cart"><h2>Your cart</h2><div class="row"><span class="th">${SHOE}</span><span><b>Aero Runner Low</b><small>Size 10 · Teal / Amber</small></span><span class="pr">$140</span></div><span class="cta" style="margin-top:16px">Proceed to checkout</span></div>`,
-  checkout:o=>`${head()}<div class="co"><div><h2>Checkout</h2><div class="box"><b>Ship to</b>Saved address · arrives Friday</div><div class="box"><b>Payment</b>Saved card</div></div><div class="sum"><div><span>Aero Runner Low</span><span>$140.00</span></div><div><span>Shipping</span><span>Free</span></div><div class="t"><span>Total</span><span>$140.00</span></div><span class="cta" style="margin-top:12px">Place order</span></div></div>`,
-  done:o=>`${head()}${o.banner?vbar(o.banner===true?'':o.banner):''}<div class="done"><div class="ok">${CK}</div><h2>Order placed</h2><p>Aero Runner Low · size 10 · $140 · arriving Friday</p></div>`,
+  cartok:o=>`${head()}${vbar('browse & add to cart: allowed')}<div class="cart"><h2>Your cart</h2><div class="row"><span class="th">${SHOE}</span><span><b>${o.n||'Aero Runner Low'}</b><small>Size 10 · Teal / Amber</small></span><span class="pr">$${o.pr||140}</span></div><span class="cta" style="margin-top:16px">Proceed to checkout</span></div>`,
+  checkout:o=>`${head()}<div class="co"><div><h2>Checkout</h2><div class="box"><b>Ship to</b>Saved address · arrives Friday</div><div class="box"><b>Payment</b>Saved card</div></div><div class="sum"><div><span>${o.n||'Aero Runner Low'}</span><span>$${o.pr||140}.00</span></div><div><span>Shipping</span><span>Free</span></div><div class="t"><span>Total</span><span>$${o.pr||140}.00</span></div><span class="cta" style="margin-top:12px">Place order</span></div></div>`,
+  done:o=>`${head()}${o.banner?vbar(o.banner===true?'':o.banner):''}<div class="done"><div class="ok">${CK}</div><h2>Order placed</h2><p>${o.n||'Aero Runner Low'} · size 10 · $${o.pr||140} · arriving Friday</p></div>`,
 };
-function vbar(t){return `<div class="vbar">${H}<span><b>AI shopping agent</b> · ${t||'allowed by your policy'}</span><span class="sp"></span><span>HUMAN Sightline</span></div>`}
-const HOLD=`<div class="veil light"><div class="hcard">${H}<h3>Before we continue…</h3><p>Press & Hold to confirm you are a human (and not a bot).</p><div class="hold idle"><span class="fill"></span><span class="lbl">Press & Hold</span></div><span class="who">${AG}AI shopping agent stopped at checkout</span><div class="by">HUMAN · checkout challenge per your policy</div></div></div>`;
-const CAPTCHA=`<div class="veil"><div class="cap-card"><h3>Quick check</h3><p>Slide to confirm you're human.</p><div class="slider"><span class="lbl">Slide to verify</span><span class="knob"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div><div class="cap-err">Verification failed. Try again.</div><span class="stuck">${AG}AI shopping agent can't continue</span></div></div>`;
+function vbar(t){return `<div class="vbar">${H}<span><b>Muse</b> · ${t||'allowed by your policy'}</span><span class="sp"></span><span>HUMAN Sightline</span></div>`}
+const HOLD=`<div class="veil light"><div class="hcard">${H}<h3>Before we continue…</h3><p>Press & Hold to confirm you are a human (and not a bot).</p><div class="hold idle"><span class="fill"></span><span class="lbl">Press & Hold</span></div><span class="who">${AG}Muse stopped at checkout</span><div class="by">HUMAN · checkout challenge per your policy</div></div></div>`;
+const CAPTCHA=`<div class="veil"><div class="cap-card"><h3>Quick check</h3><p>Slide to confirm you're human.</p><div class="slider"><span class="lbl">Slide to verify</span><span class="knob"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div><div class="cap-err">Verification failed. Try again.</div><span class="stuck">${AG}Muse can't continue</span></div></div>`;
 
 const POLHEAD=`<div class="panel-h">${H}HUMAN Sightline</div>`;
 const PANELS={
   steps:`<div class="panel dark">${POLHEAD}<div class="panel-b">
-    <div class="prow"><span>Visitor</span><span>AI shopping agent</span></div>
+    <div class="prow"><span>Visitor</span><span>Muse · AI shopping agent</span></div>
     <div class="prow"><span>Acting for</span><span>A shopper</span></div>
-    <div class="panel-sub">Policy · AI shopping agents</div>
+    <div class="panel-sub">Limited releases · AI shopping agents</div>
     <div class="steps"><div class="st"><span>Browse & search</span><span class="chip allow">Allow</span></div>
     <div class="st"><span>Add to cart</span><span class="chip allow">Allow</span></div>
     <div class="st hi"><span>Checkout</span><span class="chip challenge">Challenge</span></div></div>
@@ -342,12 +352,12 @@ const PANELS={
     <div class="panel-sub">Other agents</div>
     <div class="others"><span>AI crawlers · Rate-limit</span><span>Unknown automation · Challenge</span><span>Scraper bots · Block</span></div></div></div>`,
   shopping:`<div class="panel dark">${POLHEAD}<div class="panel-b">
-    <div class="prow"><span>Visitor</span><span>AI shopping agent</span></div>
+    <div class="prow"><span>Visitor</span><span>Muse · AI shopping agent</span></div>
     <div class="steps"><div class="st past"><span>Browse & search</span><span class="r"><span class="tick">✓</span>Allowed</span></div>
     <div class="st past"><span>Add to cart</span><span class="r"><span class="tick">✓</span>Allowed</span></div>
     <div class="st hi"><span>Checkout</span><span class="chip challenge">Next · Challenge</span></div></div></div></div>`,
   holding:`<div class="panel dark">${POLHEAD}<div class="panel-b">
-    <div class="prow"><span>Visitor</span><span>AI shopping agent</span></div>
+    <div class="prow"><span>Visitor</span><span>Muse · AI shopping agent</span></div>
     <div class="prow"><span>Step</span><span>Checkout</span></div>
     <div class="prow"><span>Policy</span><span>Challenge a person</span></div>
     <div class="prow"><span>Status</span><span>Agent stopped here</span></div></div></div>`,
@@ -355,7 +365,7 @@ const PANELS={
     <div class="steps"><div class="st past"><span>Browse & search</span><span class="r"><span class="tick">✓</span>Agent</span></div>
     <div class="st past"><span>Add to cart</span><span class="r"><span class="tick">✓</span>Agent</span></div>
     <div class="st past"><span>Checkout</span><span class="r"><span class="tick">✓</span>Shopper, no agent</span></div></div>
-    <div class="prow" style="margin-top:6px"><span>Outcome</span><span class="g">Order placed · $140</span></div></div></div>`,
+    <div class="prow" style="margin-top:6px"><span>Outcome</span><span class="g">Order placed · $180</span></div></div></div>`,
   analytics:`<div class="panel light"><div class="panel-h">Your analytics · this session</div><div class="panel-b">
     <div class="prow"><span>Visitor</span><span>Chrome · Windows</span></div>
     <div class="prow"><span>Source</span><span>Direct</span></div>
@@ -363,7 +373,7 @@ const PANELS={
     <div class="prow"><span>Acting for</span><span class="q">Unknown</span></div>
     <div class="teams"><span>Marketing: a normal visit</span><span>Security: no signal</span></div></div></div>`,
   policy:`<div class="panel dark"><div class="panel-h">${H}HUMAN Sightline</div><div class="panel-b">
-    <div class="prow"><span>Visitor</span><span>AI shopping agent</span></div>
+    <div class="prow"><span>Visitor</span><span>Muse · AI shopping agent</span></div>
     <div class="prow"><span>Acting for</span><span>A shopper</span></div>
     <div class="prow"><span>Activity</span><span>Product page → cart</span></div>
     <div class="panel-sub">Your agent policy</div>
@@ -373,7 +383,7 @@ const PANELS={
     <div class="pr"><span>Unknown automation</span><span class="chip challenge">Challenge</span></div>
     <div class="pr"><span>Scraper bots</span><span class="chip block">Block</span></div></div></div></div>`,
   allowed:`<div class="panel dark"><div class="panel-h">${H}HUMAN Sightline</div><div class="panel-b">
-    <div class="prow"><span>Visitor</span><span>AI shopping agent</span></div>
+    <div class="prow"><span>Visitor</span><span>Muse · AI shopping agent</span></div>
     <div class="prow"><span>Decision</span><span class="g">Allowed by your policy</span></div>
     <div class="prow"><span>Friction</span><span>None</span></div>
     <div class="prow"><span>Outcome</span><span>Order placed · $140</span></div></div></div>`,
@@ -384,11 +394,11 @@ const BOARDS={
     <li style="animation-delay:2.2s"><i>${CK}</i>See every AI agent on your site</li>
     <li style="animation-delay:2.7s"><i>${CK}</i>Allow, challenge, block or rate-limit each step</li>
     <li style="animation-delay:3.2s"><i>${CK}</i>Share agent activity with every team</li></ul></div>`,
-  share:`<div class="share"><div class="hub">${H}<span><b>HUMAN Sightline</b><span>Agent built the cart · shopper checked out · $140</span></span></div>
+  share:`<div class="share"><div class="hub">${H}<span><b>HUMAN Sightline</b><span>Muse · 2 orders · $320</span></span></div>
     <svg class="wires" viewBox="0 0 600 90" preserveAspectRatio="none" aria-hidden="true"><path d="M300 0V36H100V90"/><path d="M300 0V90"/><path d="M300 36H500V90"/></svg>
-    <div class="tiles"><div class="tile" style="animation-delay:1s"><h3>Marketing</h3><p>The order is attributed to an AI shopping agent in analytics.</p><span class="k">Analytics</span></div>
-    <div class="tile" style="animation-delay:1.6s"><h3>Ecommerce</h3><p>The agent built the cart; the shopper checked out.</p><span class="k">Conversion</span></div>
-    <div class="tile" style="animation-delay:2.2s"><h3>Security</h3><p>The agent was stopped at checkout, exactly as the policy says.</p><span class="k">Policy</span></div></div></div>`,
+    <div class="tiles"><div class="tile" style="animation-delay:1s"><h3>Marketing</h3><p>Both orders are attributed to Muse in analytics.</p><span class="k">Analytics</span></div>
+    <div class="tile" style="animation-delay:1.6s"><h3>Ecommerce</h3><p>Muse checked out one order; the shopper finished the limited release.</p><span class="k">Conversion</span></div>
+    <div class="tile" style="animation-delay:2.2s"><h3>Security</h3><p>Muse was stopped at checkout on the limited release, exactly as the policy says.</p><span class="k">Policy</span></div></div></div>`,
   end:`<div class="end">${LOGO}</div>`,
 };
 
@@ -399,10 +409,12 @@ const S=[
  {tag:W, cap:'Lost sale.', dur:4500, focus:'browser', msgs:[me,onit,{f:'ag',t:'Brightwell Supply is asking me to prove I’m human, and I can’t get past it. Can you finish this step yourself?'},{f:'sys',t:'No reply · task paused'}], b:{page:'cart', url:'brightwellsupply.com/cart'}},
  {tag:W, cap:'Or it walks right in looking like any Chrome user, and every team is flying blind.', dur:8000, focus:'browser', msgs:[me,onit,got], b:{page:'done', url:'brightwellsupply.com/order/confirmed'}, panel:'analytics'},
  {tag:WI, cap:'Turn on agentic visibility with HUMAN Sightline.', dur:5500, board:'switch'},
- {tag:WI, cap:'Know every agent. Set a rule for every step.', dur:8000, focus:'browser', msgs:[me,onit], b:{page:'product', prot:true}, panel:'steps'},
- {tag:WI, cap:'Let it shop...', dur:5000, focus:'browser', msgs:[me,onit,{f:'sys',t:'Added to cart'}], b:{page:'cartok', url:'brightwellsupply.com/cart', prot:true}, panel:'shopping'},
- {tag:WI, cap:'...but keep checkout for people, if that’s your policy.', dur:8000, focus:'all', msgs:[me,onit,{f:'sys',t:'Added to cart'},{f:'ag',t:'Brightwell Supply doesn’t let agents check out limited releases, so I stopped there. Your cart is saved. Here’s the link to finish checkout.',opts:['brightwellsupply.com/cart']}], b:{page:'checkout', url:'brightwellsupply.com/checkout', prot:true, hold:true}, panel:'holding'},
- {tag:WI, cap:'Granular controls, aligned to your business policy. The sale still goes through.', dur:6500, focus:'all', msgs:[me,onit,{f:'sys',t:'Added to cart'},{f:'ag',t:'Brightwell Supply doesn’t let agents check out limited releases, so I stopped there. Your cart is saved. Here’s the link to finish checkout.',opts:['brightwellsupply.com/cart']},{f:'sys',t:'You checked out on brightwellsupply.com'}], b:{page:'done', url:'brightwellsupply.com/order/confirmed', banner:'built the cart · checkout completed by the shopper', prot:true}, panel:'confirmed'},
+ {tag:WI, cap:'Know every agent. Choose what gets through.', dur:8000, focus:'browser', msgs:[me,onit], b:{page:'product', prot:true}, panel:'policy'},
+ {tag:WI, cap:'Flow, not friction. The sale goes through.', dur:5500, focus:'all', msgs:[me,onit,got], b:{page:'done', url:'brightwellsupply.com/order/confirmed', banner:true, prot:true}, panel:'allowed'},
+ {tag:WI, cap:'Then set policies that align to your business.', dur:8000, focus:'all', msgs:[me,onit,got,me2,onit2], b:{page:'product', url:'brightwellsupply.com/aero-runner-gold', prot:true, ...G}, panel:'steps'},
+ {tag:WI, cap:'Let it shop...', dur:5000, focus:'browser', msgs:[me,onit,got,me2,onit2,{f:'sys',t:'Added to cart'}], b:{page:'cartok', url:'brightwellsupply.com/cart', prot:true, ...G}, panel:'shopping'},
+ {tag:WI, cap:'...but keep checkout for people on limited releases.', dur:8000, focus:'all', msgs:[me,onit,got,me2,onit2,{f:'sys',t:'Added to cart'},{f:'ag',t:'Brightwell Supply doesn’t let agents check out limited releases, so I stopped there. Your cart is saved. Here’s the link to finish checkout.',opts:['brightwellsupply.com/cart']}], b:{page:'checkout', url:'brightwellsupply.com/checkout', prot:true, hold:true, ...G}, panel:'holding'},
+ {tag:WI, cap:'Granular controls, aligned to your business policy. The sale still goes through.', dur:6500, focus:'all', msgs:[me,onit,got,me2,onit2,{f:'sys',t:'Added to cart'},{f:'ag',t:'Brightwell Supply doesn’t let agents check out limited releases, so I stopped there. Your cart is saved. Here’s the link to finish checkout.',opts:['brightwellsupply.com/cart']},{f:'sys',t:'You checked out on brightwellsupply.com'}], b:{page:'done', url:'brightwellsupply.com/order/confirmed', banner:'built the cart · checkout completed by the shopper', prot:true, ...G}, panel:'confirmed'},
  {tag:WI, cap:'Every team sees what agents did.', dur:7000, board:'share'},
  {tag:null, cap:'Agentic-ready with HUMAN.', dur:4500, board:'end'},
 ];
@@ -415,9 +427,10 @@ function phoneHTML(s,prev){
   const keep = prev && prev.msgs ? prev.msgs.length : 0;
   const ms=(s.msgs||[]).map((m,k)=>`<div class="m ${m.f}"${k<keep&&prev&&!prev.board?' style="animation:none"':''}>${m.t}${(m.opts||[]).map(o=>`<span class="opt">${o}</span>`).join('')}</div>`).join('');
   return `<div class="p-status"><span>9:41</span><span>●●●</span></div>
-   <div class="p-head">${AG}<span><b>Shopping agent</b><span>AI assistant</span></span></div>
+   <div class="p-head"><span class="p-round">${ico('<path d="M5 9h14M5 15h14"/>')}</span><span class="p-ava">${AG}<span class="nm">Muse</span></span><span class="p-invite">Invite</span></div>
    <div class="p-msgs">${ms}</div>
-   <div class="p-input"><span class="txt ${s.typing?'':'ph'}" id="ptxt">${s.typing?'':'Message'}</span><span class="send"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg></span></div>`;
+   <div class="p-input">${ico('<path d="M12 5v14M5 12h14"/>',20)}<span class="txt ${s.typing?'':'ph'}" id="ptxt">${s.typing?'':'Message'}</span>${ico('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/>',19)}</div>
+   <div class="p-tabs"><span class="on">${ico('<path d="M4 12a8 7 0 1 1 3.4 5.7L4 19l1-3.3A6.8 6.8 0 0 1 4 12z"/>',17)}</span><span>${ico('<rect x="5" y="4" width="14" height="16" rx="2.5"/><path d="M9 9h6M9 13h6"/>',17)}</span><span>${ico('<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>',17)}</span><span>${ico('<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8.5 12.2l2.4 2.4 4.8-5"/>',17)}</span><span>${ico('<circle cx="7.5" cy="7.5" r="3.2"/><path d="M16.5 4l3.5 6h-7z"/><rect x="4.3" y="13.8" width="6.4" height="6.4" rx="1.4"/><circle cx="16.5" cy="17" r="3.2"/>',17)}</span></div>`;
 }
 function render(){
   const s=S[i], prev=prevI>=0?S[prevI]:null; prevI=i;
