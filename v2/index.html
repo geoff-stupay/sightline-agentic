@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sightline AgenticTrust v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&family=Barlow:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: HUMAN deck system. Caption column left (the story is told in captions, sound off), visual area right:
+   either the agent app + merchant browser + panel, or a full-width board. Thin scene timeline + small controls below. */
+:root{
+  color-scheme:light;
+  --field:#F6F4FF; --card:#FFFFFF; --lav:#EAE4FB; --lav-2:#F6F4FF; --line:#E0E1EE; --line-2:#D4CFF0;
+  --ink:#1A1A1A; --muted:#4A4A6A; --faint:#6B7280; --deep:#1C1C2E;
+  --purple:#6C47FF; --purple-deep:#5728DE;
+  --ok:#16A34A; --ok-bg:#DCFCE7; --warn:#B45309; --warn-bg:#FEF3C7; --bad:#B91C1C; --bad-bg:#FEE2E2;
+  --f-display:"Bricolage Grotesque","Barlow",system-ui,sans-serif;
+  --f-body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"Geist Mono",ui-monospace,Menlo,monospace;
+}
+html,body{height:100%}
+body{background:var(--field);color:var(--ink);font-family:var(--f-body);font-size:15px}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--purple);outline-offset:2px}
+.hmark,.hlogo,.agent-ic{display:inline-block;flex:none}
+.hmark,.hlogo{color:var(--purple-deep)}
+
+.app{min-height:100%;display:flex;flex-direction:column;gap:16px;max-width:1440px;margin:0 auto;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 14px}
+.top{display:flex;align-items:center;gap:12px}
+.top .hlogo{height:20px;width:auto;aspect-ratio:480/111;color:var(--ink)}
+.top .div{width:1px;height:18px;background:var(--line-2)}
+.top small{font-family:var(--f-display);font-weight:600;font-size:15px;color:var(--muted)}
+
+.stage{flex:1;display:grid;grid-template-columns:minmax(260px,360px) minmax(0,1fr);gap:32px;align-items:center}
+.cap{min-width:0}
+.tag{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;border-radius:999px;padding:5px 11px;margin-bottom:16px}
+.tag.without{background:#ECEBF2;color:var(--muted)}
+.tag.with{background:var(--purple-deep);color:#fff}
+.tag.with .hmark{width:14px;height:14px;color:#fff}
+.tag.today{background:var(--lav);color:var(--purple-deep)}
+.cap h1{font-family:var(--f-display);font-weight:700;color:var(--purple-deep);font-size:clamp(30px,3.3vw,46px);line-height:1.05;letter-spacing:-.02em;margin:0;text-wrap:balance}
+.cap .anim{animation:rise .8s ease both}
+
+.vis{min-width:0;position:relative}
+.split{display:grid;grid-template-columns:280px minmax(0,1fr);gap:24px;align-items:center}
+.phone-col,.browser-col{transition:opacity .8s ease,filter .8s ease;min-width:0}
+.split[data-focus="phone"] .browser-col,.split[data-focus="browser"] .phone-col{opacity:.4;filter:saturate(.5)}
+.browser-col{position:relative}
+
+/* ---------- generic agent app ---------- */
+.phone{width:280px;height:580px;border-radius:42px;background:#F6F6F7;color:#141414;border:9px solid #1E1B29;box-shadow:0 0 0 1px #2A2740,0 24px 60px rgba(28,28,46,.2);position:relative;overflow:hidden;display:flex;flex-direction:column;margin:0 auto;font-family:-apple-system,"SF Pro Text",system-ui,"Segoe UI",sans-serif}
+.p-status{display:flex;justify-content:space-between;align-items:center;padding:11px 22px 2px;font-size:13px;font-weight:600}
+.p-head{display:flex;align-items:center;gap:9px;padding:10px 14px 12px;border-bottom:1px solid #E8E8EC;flex:none}
+.agent-ic{width:30px;height:30px;border-radius:50%;background:#26233A;display:grid;place-items:center}
+.agent-ic svg{width:16px;height:16px}
+.p-head b{font-size:14px;display:block}
+.p-head span{font-size:11.5px;color:#8A8A90}
+.p-msgs{flex:1;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;gap:9px;padding:10px 12px}
+.m{font-size:13.5px;line-height:1.38;padding:10px 13px;border-radius:18px;animation:rise .7s ease both}
+.m.me{align-self:flex-end;max-width:84%;background:#141414;color:#fff}
+.m.ag{align-self:stretch;background:#EBEBEE}
+.m .opt{display:block;border:1px dashed #B5B5BC;border-radius:10px;padding:7px 10px;margin-top:7px;font-size:12.5px;background:#fff}
+.m.sys{align-self:center;background:none;padding:2px 0;color:#8A8A90;font-size:11px}
+.p-input{margin:0 10px 12px;background:#fff;border-radius:22px;min-height:44px;display:flex;align-items:center;gap:10px;padding:6px 8px 6px 14px;font-size:13.5px;box-shadow:0 2px 12px rgba(0,0,0,.06);flex:none}
+.p-input .txt{flex:1;min-width:0;line-height:1.35}
+.p-input .txt.ph{color:#9A9AA2}
+.p-input .send{width:30px;height:30px;border-radius:50%;background:#141414;color:#fff;display:grid;place-items:center;flex:none}
+.caret{display:inline-block;width:1.5px;height:15px;background:#4C7BF4;vertical-align:-2px;animation:blink 1s steps(1) infinite}
+
+/* ---------- merchant browser ---------- */
+.browser{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 0 0 1px var(--line),0 24px 60px rgba(87,40,222,.12);height:580px;display:flex;flex-direction:column}
+.b-chrome{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--lav);color:var(--muted);font-size:12px}
+.b-dots{display:flex;gap:6px}.b-dots i{width:10px;height:10px;border-radius:50%;background:#CFC6F2}
+.b-url{flex:1;min-width:0;background:#fff;border-radius:6px;padding:4px 10px;font-family:var(--f-mono);font-size:11.5px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.b-state{display:flex;align-items:center;gap:6px;white-space:nowrap;font-size:11px}
+.b-state .hmark{width:13px;height:13px}
+.b-page{flex:1;position:relative;overflow:hidden}
+.pg{position:absolute;inset:0;overflow:hidden;animation:fade .7s ease both}
+.mh{display:flex;align-items:center;gap:16px;padding:13px 22px;border-bottom:1px solid var(--line);font-size:12.5px;color:var(--faint)}
+.mh .wm{font-family:var(--f-display);font-weight:700;font-size:18px;color:var(--ink);letter-spacing:-.01em;display:flex;align-items:center;gap:7px}
+.mh .wm i{width:16px;height:16px;border-radius:4px;background:#0F766E;display:inline-block}
+.mh .sp{flex:1}
+.vbar{display:flex;align-items:center;gap:8px;background:var(--lav);color:var(--purple-deep);font-size:12px;padding:7px 22px;font-weight:500;animation:fade .4s ease both}
+.vbar .hmark{width:15px;height:15px}
+.vbar .sp{flex:1}
+.prod{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;padding:22px}
+.art{border-radius:14px;background:#F3F4F6;aspect-ratio:1/1;max-width:100%;display:grid;place-items:center}
+.art svg{width:78%}
+.badge{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#0F766E;background:#CCFBF1;border-radius:4px;padding:3px 7px;margin-bottom:10px}
+.prod h2{font-family:var(--f-display);font-size:25px;line-height:1.1;margin:0 0 4px}
+.prod .sub{color:var(--faint);font-size:13px}
+.price{font-family:var(--f-display);font-size:24px;font-weight:700;margin:12px 0;font-variant-numeric:tabular-nums}
+.sizes{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px}
+.sizes span{border:1px solid var(--line);border-radius:8px;text-align:center;padding:7px 0;font-size:12.5px}
+.sizes span.sel{border-color:var(--ink);font-weight:600}
+.cta{display:block;text-align:center;background:var(--ink);color:#fff;border-radius:999px;padding:11px 18px;font-weight:600;font-size:13.5px}
+.cta.dim{opacity:.3}
+
+.cart{padding:24px}
+.cart h2{font-family:var(--f-display);font-size:24px;margin:0 0 14px}
+.cart .row{display:grid;grid-template-columns:64px 1fr auto;gap:14px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:12px}
+.cart .row .th{width:64px;height:64px;border-radius:10px;background:#F3F4F6;display:grid;place-items:center}
+.cart .row .th svg{width:54px}
+.cart .row b{font-size:14.5px}
+.cart .row small{display:block;color:var(--faint);font-size:12.5px}
+.cart .row .pr{font-family:var(--f-display);font-weight:700;font-variant-numeric:tabular-nums}
+.pill{display:inline-flex;gap:6px;align-items:center;font-size:12px;font-weight:600;border-radius:999px;padding:4px 10px;margin-top:14px}
+.pill.bad{background:var(--bad-bg);color:var(--bad)}
+.stamp{position:absolute;left:50%;top:58%;transform:translate(-50%,-50%) rotate(-8deg);border:4px solid var(--bad);color:var(--bad);font-family:var(--f-display);font-weight:700;font-size:44px;letter-spacing:.02em;padding:6px 26px;border-radius:12px;background:rgba(255,255,255,.85);animation:stamp .6s cubic-bezier(.2,1.4,.4,1) .9s both;white-space:nowrap}
+
+.done{display:flex;flex-direction:column;align-items:center;text-align:center;padding:56px 24px 0;gap:8px}
+.done .ok{width:52px;height:52px;border-radius:50%;background:var(--ok-bg);display:grid;place-items:center;margin-bottom:6px}
+.done .ok svg{width:24px;height:24px;color:var(--ok)}
+.done h2{font-family:var(--f-display);font-size:26px;margin:0}
+.done p{margin:0;color:var(--faint);font-size:14px}
+
+/* generic CAPTCHA (made up, not any real vendor's) */
+.veil{position:absolute;inset:0;background:rgba(240,240,244,.82);backdrop-filter:blur(3px);display:grid;place-items:center;padding:20px;animation:fade .7s ease .3s both}
+.cap-card{width:min(330px,100%);background:#fff;border:1px solid #D9DAE3;border-radius:12px;padding:20px;box-shadow:0 16px 40px rgba(0,0,0,.12)}
+.cap-card h3{margin:0 0 4px;font-size:17px;font-family:var(--f-display)}
+.cap-card p{margin:0 0 14px;font-size:13px;color:var(--faint)}
+.slider{position:relative;height:44px;border-radius:8px;background:#EEF0F4;border:1px solid #D9DAE3;overflow:hidden}
+.slider .lbl{position:absolute;inset:0;display:grid;place-items:center;font-size:12.5px;color:#7A7F8C}
+.slider .knob{position:absolute;left:3px;top:3px;width:52px;height:36px;border-radius:6px;background:#6B7280;color:#fff;display:grid;place-items:center;animation:tryslide 2.2s ease-in-out 1.2s 2 both}
+.slider .knob svg{width:16px;height:16px}
+.cap-err{margin-top:10px;font-size:12.5px;color:var(--bad);font-weight:600;animation:fade .5s ease 3.6s both}
+.stuck{display:inline-flex;align-items:center;gap:7px;margin-top:12px;font-size:11.5px;font-weight:600;color:#3B3B46;background:#F1F1F4;border-radius:999px;padding:4px 10px 4px 5px}
+.stuck .agent-ic{width:18px;height:18px}.stuck .agent-ic svg{width:10px;height:10px}
+
+.hold{position:relative;overflow:hidden;border:2px solid #1A1A1A;border-radius:999px;height:48px;display:grid;place-items:center;font-weight:700;font-size:14px;margin:4px auto 12px;width:240px;max-width:100%;background:#fff}
+.hold .fill{position:absolute;inset:0 auto 0 0;width:0;background:#1A1A1A;animation:holdfill 3s cubic-bezier(.4,0,.6,1) 2.6s forwards}
+.hold .lbl{position:relative;color:#fff;mix-blend-mode:difference}
+@keyframes holdfill{to{width:100%}}
+.hcard{width:min(340px,100%);background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px 20px 16px;text-align:center;box-shadow:0 20px 50px rgba(87,40,222,.14)}
+.hcard .hmark{width:34px;height:34px;display:block;margin:0 auto 10px}
+.hcard h3{font-family:var(--f-display);font-size:19px;margin:0 0 6px}
+.hcard p{font-size:13px;color:var(--faint);margin:0 0 12px;line-height:1.45}
+.hold.idle .fill{animation:none}
+.hcard .who .agent-ic{width:18px;height:18px}.hcard .who .agent-ic svg{width:10px;height:10px}
+.hcard .who{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--purple-deep);background:var(--lav-2);border-radius:999px;padding:4px 10px;animation:fade .5s ease 2.2s both}
+.hcard .by{font-size:10.5px;color:var(--faint);margin-top:10px;font-family:var(--f-mono)}
+.veil.light{background:rgba(246,244,255,.82)}
+.co{padding:22px;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:18px}
+.co h2{font-family:var(--f-display);font-size:22px;margin:0 0 12px}
+.co .box{border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.6;margin-bottom:10px}
+.co .box b{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
+.co .sum{border:1px solid var(--line);border-radius:12px;padding:14px;font-size:13px}
+.co .sum div{display:flex;justify-content:space-between;padding:4px 0}
+.co .sum .t{border-top:1px solid var(--line);margin-top:6px;padding-top:8px;font-weight:700}
+.cta.ok-cta{background:var(--ink)}
+.steps{margin-top:6px;display:flex;flex-direction:column;gap:6px}
+.st{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:#26243B;font-size:12.5px}
+.st.hi{background:#322C5C;outline:1px solid var(--purple)}
+.st.past{opacity:.8}
+.st .r{display:flex;align-items:center;gap:6px}
+.st .tick{color:#7EE7A6;font-weight:700}
+.others{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.others span{font-size:11px;color:#B7B2D8;background:#26243B;border-radius:999px;padding:3px 8px}
+.seg span.on.amber{background:#D97706}
+/* side panels */
+.panel{position:absolute;right:-16px;bottom:-20px;width:300px;border-radius:14px;overflow:hidden;animation:panelIn .8s cubic-bezier(.2,.8,.2,1) .6s both;z-index:3;font-size:12.5px}
+.panel.light{background:#fff;border:1px solid var(--line);box-shadow:0 20px 50px rgba(28,28,46,.16)}
+.panel.dark{background:var(--deep);color:#F4F2FF;box-shadow:0 20px 50px rgba(28,28,46,.3)}
+.panel-h{display:flex;align-items:center;gap:8px;padding:11px 14px;font-weight:600;font-size:12.5px;border-bottom:1px solid var(--line)}
+.panel.dark .panel-h{border-color:#2E2B48}
+.panel.dark .hmark{color:#fff;width:16px;height:16px}
+.panel-b{padding:6px 14px 12px}
+.prow{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px dashed var(--line)}
+.panel.dark .prow{border-color:#2E2B48}
+.prow:last-child{border-bottom:0}
+.prow span:first-child{color:var(--faint)}
+.panel.dark .prow span:first-child{color:#9C97C2}
+.prow span:last-child{text-align:right;font-weight:600}
+.prow .w{color:var(--warn)}.prow .g{color:#7EE7A6}.prow .q{color:#9A9AA2;font-weight:500}
+.teams{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.teams span{font-size:11.5px;font-weight:600;border-radius:999px;padding:4px 9px;background:#F1F1F4;color:var(--muted)}
+.pol{margin-top:6px;display:flex;flex-direction:column;gap:6px}
+.pol .pr{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 9px;border-radius:8px;background:#26243B}
+.pol .pr.hi{background:#322C5C;outline:1px solid var(--purple)}
+.pol .pr span{font-size:12px}
+.chip{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border-radius:999px;padding:3px 8px}
+.chip.allow{background:rgba(34,197,94,.18);color:#86EFAC}
+.chip.challenge{background:rgba(245,158,11,.18);color:#FCD34D}
+.chip.block{background:rgba(240,72,72,.2);color:#FCA5A5}
+.chip.limit{background:rgba(108,71,255,.28);color:#C9BCFF}
+.seg{display:flex;gap:3px;margin-top:7px}
+.seg span{flex:1;text-align:center;font-size:10.5px;font-weight:600;padding:4px 0;border-radius:6px;background:#1C1C2E;color:#8E89B5}
+.seg span.on{background:var(--ok);color:#fff;animation:pick .6s ease 2s both}
+.panel-sub{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#9C97C2;font-weight:600;margin:10px 0 2px}
+
+/* ---------- boards ---------- */
+.board{min-height:580px;display:grid;place-items:center;animation:fade .8s ease both}
+.switch-card{width:min(460px,100%);background:#fff;border-radius:18px;padding:30px 30px 26px;box-shadow:0 24px 60px rgba(87,40,222,.14);text-align:left}
+.switch-card .hlogo{height:22px;width:auto;aspect-ratio:480/111}
+.switch-card .t{display:flex;justify-content:space-between;align-items:center;margin:22px 0 6px;gap:16px}
+.switch-card h2{font-family:var(--f-display);font-size:26px;margin:0;letter-spacing:-.01em}
+.switch-card .sub{color:var(--faint);font-size:14px;margin:0 0 18px}
+.toggle{width:64px;height:36px;border-radius:999px;background:#D7D4E6;position:relative;flex:none;animation:ton .6s ease 1.4s both}
+.toggle i{position:absolute;left:4px;top:4px;width:28px;height:28px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.2);animation:kon .6s ease 1.4s both}
+.switch-card ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.switch-card li{display:flex;gap:10px;align-items:center;font-size:14.5px;animation:rise .4s ease both}
+.switch-card li i{width:22px;height:22px;border-radius:50%;background:var(--purple-deep);color:#fff;display:grid;place-items:center;flex:none}
+.switch-card li i svg{width:12px;height:12px}
+
+.share{width:100%;max-width:820px}
+.hub{width:min(420px,100%);margin:0 auto;background:var(--deep);color:#F4F2FF;border-radius:16px;padding:18px 20px;display:flex;gap:14px;align-items:center;box-shadow:0 20px 50px rgba(28,28,46,.25)}
+.hub .hmark{width:34px;height:34px;color:#fff}
+.hub b{font-family:var(--f-display);font-size:17px;display:block}
+.hub span{font-size:13px;color:#B7B2D8}
+.wires{display:block;width:100%;height:90px}
+.wires path{fill:none;stroke:var(--purple);stroke-width:2;stroke-dasharray:6 7;vector-effect:non-scaling-stroke;animation:flow 1.2s linear infinite}
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.tile{background:#fff;border-radius:14px;padding:16px 18px;box-shadow:0 12px 30px rgba(87,40,222,.08);animation:rise .7s ease both}
+.tile h3{margin:0 0 8px;font-family:var(--f-display);font-size:18px;color:var(--purple-deep)}
+.tile p{margin:0;font-size:13.5px;line-height:1.45;color:var(--muted)}
+.tile .k{display:inline-block;margin-top:10px;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
+
+.end{display:flex;flex-direction:column;align-items:center;gap:22px;text-align:center}
+.end .hlogo{height:72px;width:auto;aspect-ratio:480/111;color:var(--ink);animation:rise .9s ease both}
+.end p{margin:0;font-family:var(--f-display);font-weight:700;font-size:clamp(26px,3vw,40px);color:var(--purple-deep);animation:rise .5s ease .2s both}
+
+/* ---------- timeline + controls ---------- */
+.ctrl{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.tl{flex:1;display:flex;gap:4px;min-width:200px}
+.tl button{border:0;padding:6px 0;background:transparent;flex:1}
+.tl button i{display:block;height:4px;border-radius:2px;background:var(--line-2);overflow:hidden;position:relative}
+.tl button i b{position:absolute;inset:0 auto 0 0;width:0;background:var(--purple-deep)}
+.tl button.past i b{width:100%}
+.tl button.cur i b{animation:fill linear forwards}
+.tl.paused button.cur i b{animation-play-state:paused}
+.btns{display:flex;gap:4px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:4px}
+.btns button{width:34px;height:34px;border-radius:50%;border:0;background:transparent;display:grid;place-items:center;color:var(--muted)}
+.btns button:hover{background:var(--lav);color:var(--purple-deep)}
+.btns button.main{background:var(--purple-deep);color:#fff}
+.btns svg{width:16px;height:16px}
+.note{font-size:11.5px;color:var(--faint);width:100%;text-align:center}
+body.embed .btns,body.embed .note{display:none}
+
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes panelIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes blink{50%{opacity:0}}
+@keyframes fill{to{width:100%}}
+@keyframes flow{to{stroke-dashoffset:-26}}
+@keyframes stamp{from{opacity:0;transform:translate(-50%,-50%) rotate(-8deg) scale(1.6)}to{opacity:1;transform:translate(-50%,-50%) rotate(-8deg) scale(1)}}
+@keyframes tryslide{0%{left:3px}55%{left:46%}70%{left:46%}100%{left:3px}}
+@keyframes ton{to{background:var(--ok)}}
+@keyframes kon{to{left:32px}}
+@keyframes pick{from{transform:scale(.8);opacity:.4}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-delay:0ms!important;animation-iteration-count:1!important;transition:none!important}.tl button.cur i b{animation:none;width:100%}}
+
+@media (max-width:1100px){
+  .stage{grid-template-columns:minmax(0,1fr);gap:20px}
+  .panel{right:10px;bottom:10px}
+}
+@media (max-width:760px){
+  .split{grid-template-columns:minmax(0,1fr)}
+  .split[data-focus="phone"] .browser-col,.split[data-focus="browser"] .phone-col{display:none}
+  .browser{height:auto;min-height:500px}
+  .b-page{min-height:460px}
+  .panel{position:relative;right:auto;bottom:auto;width:100%;margin-top:12px}
+  .prod{grid-template-columns:1fr}
+  .tiles{grid-template-columns:1fr}
+  .wires{height:50px}
+  .board{min-height:auto;padding-block:20px}
+  .top small{font-size:13px}
+}
+</style>
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+</head>
+<body>
+
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <path id="hp" fill="currentColor" fill-rule="evenodd" d="M47.9 110.5C47.8 110.0 47.6 110.0 45.5 110.0C43.5 110.0 43.2 109.9 43.0 109.5C42.8 109.1 42.5 109.0 41.0 109.0C39.5 109.0 39.2 108.9 39.0 108.5C38.8 108.1 38.5 108.0 37.5 108.0C36.5 108.0 36.2 107.9 36.0 107.5C35.8 107.2 35.5 107.0 35.0 107.0C34.5 107.0 34.2 106.8 34.0 106.5C33.8 106.2 33.5 106.0 33.0 106.0C32.5 106.0 32.2 105.8 32.0 105.5C31.8 105.2 31.5 105.0 31.0 105.0C30.5 105.0 30.2 104.8 30.0 104.5C29.8 104.2 29.5 104.0 29.0 104.0C28.5 104.0 28.2 103.8 28.0 103.5C27.8 103.2 27.5 103.0 27.1 103.0C26.6 103.0 26.1 102.7 25.5 102.0C24.9 101.4 24.4 101.0 24.0 101.0C23.6 101.0 23.0 100.5 22.0 99.5C21.1 98.6 20.3 98.0 20.0 98.0C19.3 98.0 13.0 91.7 13.0 91.0C13.0 90.7 12.4 89.9 11.5 89.0C10.5 88.0 10.0 87.4 10.0 87.0C10.0 86.6 9.6 86.1 9.0 85.5C8.3 84.9 8.0 84.4 8.0 83.9C8.0 83.5 7.8 83.2 7.5 83.0C7.2 82.8 7.0 82.5 7.0 82.0C7.0 81.5 6.8 81.2 6.5 81.0C6.2 80.8 6.0 80.5 6.0 80.0C6.0 79.5 5.8 79.2 5.5 79.0C5.2 78.8 5.0 78.5 5.0 78.0C5.0 77.5 4.8 77.2 4.5 77.0C4.2 76.8 4.0 76.5 4.0 76.0C4.0 75.5 3.8 75.2 3.5 75.0C3.1 74.8 3.0 74.5 3.0 73.5C3.0 72.5 2.9 72.2 2.5 72.0C2.1 71.8 2.0 71.5 2.0 70.0C2.0 68.5 1.9 68.2 1.5 68.0C1.0 67.8 1.0 67.5 1.0 65.0C1.0 62.4 1.0 62.2 0.5 62.1C0.0 61.9 0.0 61.7 0.0 55.5C0.0 49.3 0.0 49.1 0.5 48.9C1.0 48.8 1.0 48.6 1.0 46.0C1.0 43.5 1.0 43.2 1.5 43.0C1.9 42.8 2.0 42.5 2.0 41.0C2.0 39.5 2.1 39.2 2.5 39.0C2.9 38.8 3.0 38.5 3.0 37.5C3.0 36.5 3.1 36.2 3.5 36.0C3.8 35.8 4.0 35.5 4.0 35.0C4.0 34.5 4.2 34.2 4.5 34.0C4.8 33.8 5.0 33.5 5.0 33.0C5.0 32.5 5.2 32.2 5.5 32.0C5.8 31.8 6.0 31.5 6.0 31.0C6.0 30.5 6.2 30.2 6.5 30.0C6.8 29.8 7.0 29.5 7.0 29.0C7.0 28.5 7.2 28.2 7.5 28.0C7.8 27.8 8.0 27.5 8.0 27.1C8.0 26.6 8.3 26.1 9.0 25.5C9.6 24.9 10.0 24.4 10.0 24.0C10.0 23.6 10.5 23.0 11.5 22.0C12.4 21.1 13.0 20.3 13.0 20.0C13.0 19.3 19.3 13.0 20.0 13.0C20.3 13.0 21.1 12.4 22.0 11.5C23.0 10.5 23.6 10.0 24.0 10.0C24.4 10.0 24.9 9.6 25.5 9.0C26.1 8.3 26.6 8.0 27.1 8.0C27.5 8.0 27.8 7.8 28.0 7.5C28.2 7.2 28.5 7.0 29.0 7.0C29.5 7.0 29.8 6.8 30.0 6.5C30.2 6.2 30.5 6.0 31.0 6.0C31.5 6.0 31.8 5.8 32.0 5.5C32.2 5.2 32.5 5.0 33.0 5.0C33.5 5.0 33.8 4.8 34.0 4.5C34.2 4.2 34.5 4.0 35.0 4.0C35.5 4.0 35.8 3.8 36.0 3.5C36.2 3.1 36.5 3.0 37.5 3.0C38.5 3.0 38.8 2.9 39.0 2.5C39.2 2.1 39.5 2.0 41.0 2.0C42.5 2.0 42.8 1.9 43.0 1.5C43.2 1.1 43.5 1.0 45.5 1.0C47.6 1.0 47.8 1.0 47.9 0.5C48.1 0.0 48.3 0.0 55.5 0.0C62.7 0.0 62.9 0.0 63.1 0.5C63.2 1.0 63.4 1.0 65.5 1.0C67.5 1.0 67.8 1.1 68.0 1.5C68.2 1.9 68.5 2.0 70.0 2.0C71.5 2.0 71.8 2.1 72.0 2.5C72.2 2.9 72.5 3.0 73.5 3.0C74.5 3.0 74.8 3.1 75.0 3.5C75.2 3.8 75.5 4.0 76.0 4.0C76.5 4.0 76.8 4.2 77.0 4.5C77.2 4.8 77.5 5.0 78.0 5.0C78.5 5.0 78.8 5.2 79.0 5.5C79.2 5.8 79.5 6.0 80.0 6.0C80.5 6.0 80.8 6.2 81.0 6.5C81.2 6.8 81.5 7.0 82.0 7.0C82.5 7.0 82.8 7.2 83.0 7.5C83.2 7.8 83.5 8.0 83.9 8.0C84.4 8.0 84.9 8.3 85.5 9.0C86.0 9.6 86.6 10.0 87.0 10.0C87.4 10.0 88.2 10.6 89.5 12.0C90.7 13.3 91.7 14.0 92.0 14.0C92.7 14.0 97.0 18.3 97.0 19.0C97.0 19.3 97.6 20.1 98.5 21.0C99.5 22.0 100.0 22.6 100.0 23.0C100.0 23.4 100.4 23.9 101.0 24.5C101.7 25.1 102.0 25.6 102.0 26.0C102.0 26.4 102.3 26.9 103.0 27.5C103.7 28.1 104.0 28.6 104.0 29.1C104.0 29.5 104.2 29.8 104.5 30.0C104.8 30.2 105.0 30.5 105.0 31.0C105.0 31.5 105.2 31.8 105.5 32.0C105.8 32.2 106.0 32.5 106.0 33.0C106.0 33.5 106.2 33.8 106.5 34.0C106.9 34.2 107.0 34.5 107.0 35.5C107.0 36.5 107.1 36.8 107.5 37.0C107.9 37.2 108.0 37.5 108.0 38.5C108.0 39.5 108.1 39.8 108.5 40.0C108.9 40.2 109.0 40.5 109.0 42.0C109.0 43.5 109.1 43.8 109.5 44.0C110.0 44.2 110.0 44.5 110.0 48.0C110.0 51.5 110.0 51.8 110.5 52.0C111.0 52.2 111.0 52.5 111.0 55.5C111.0 58.5 111.0 58.8 110.5 59.0C110.0 59.2 110.0 59.5 110.0 63.0C110.0 66.5 110.0 66.8 109.5 67.0C109.1 67.2 109.0 67.5 109.0 69.0C109.0 70.5 108.9 70.8 108.5 71.0C108.1 71.2 108.0 71.5 108.0 72.5C108.0 73.5 107.9 73.8 107.5 74.0C107.1 74.2 107.0 74.5 107.0 75.5C107.0 76.5 106.9 76.8 106.5 77.0C106.2 77.2 106.0 77.5 106.0 78.0C106.0 78.5 105.8 78.8 105.5 79.0C105.2 79.2 105.0 79.5 105.0 80.0C105.0 80.5 104.8 80.8 104.5 81.0C104.2 81.2 104.0 81.5 104.0 81.9C104.0 82.4 103.7 82.9 103.0 83.5C102.3 84.1 102.0 84.6 102.0 85.0C102.0 85.4 101.7 85.9 101.0 86.5C100.4 87.0 100.0 87.6 100.0 88.0C100.0 88.4 99.4 89.2 98.0 90.5C96.7 91.7 96.0 92.7 96.0 93.0C96.0 93.7 92.7 97.0 92.0 97.0C91.7 97.0 90.7 97.7 89.5 99.0C88.2 100.4 87.4 101.0 87.0 101.0C86.6 101.0 86.0 101.4 85.5 102.0C84.9 102.7 84.4 103.0 83.9 103.0C83.5 103.0 83.2 103.2 83.0 103.5C82.8 103.8 82.5 104.0 82.0 104.0C81.5 104.0 81.2 104.2 81.0 104.5C80.8 104.8 80.5 105.0 80.0 105.0C79.5 105.0 79.2 105.2 79.0 105.5C78.8 105.8 78.5 106.0 78.0 106.0C77.5 106.0 77.2 106.2 77.0 106.5C76.8 106.8 76.5 107.0 76.0 107.0C75.5 107.0 75.2 107.2 75.0 107.5C74.8 107.9 74.5 108.0 73.5 108.0C72.5 108.0 72.2 108.1 72.0 108.5C71.8 108.9 71.5 109.0 70.0 109.0C68.5 109.0 68.2 109.1 68.0 109.5C67.8 109.9 67.5 110.0 65.5 110.0C63.4 110.0 63.2 110.0 63.1 110.5C62.9 111.0 62.7 111.0 55.5 111.0C48.3 111.0 48.1 111.0 47.9 110.5ZM62.0 102.5C62.2 102.1 62.5 102.0 64.5 102.0C66.5 102.0 66.8 101.9 67.0 101.5C67.2 101.1 67.5 101.0 68.5 101.0C69.5 101.0 69.8 100.9 70.0 100.5C70.2 100.1 70.5 100.0 71.5 100.0C72.5 100.0 72.8 99.9 73.0 99.5C73.2 99.2 73.5 99.0 74.0 99.0C74.5 99.0 74.8 98.8 75.0 98.5C75.2 98.2 75.5 98.0 76.0 98.0C76.5 98.0 76.8 97.8 77.0 97.5C77.2 97.2 77.5 97.0 78.0 97.0C78.5 97.0 78.8 96.8 79.0 96.5C79.2 96.2 79.5 96.0 79.9 96.0C80.4 96.0 80.9 95.7 81.5 95.0C82.0 94.4 82.6 94.0 82.9 94.0C83.7 94.0 94.0 83.7 94.0 82.9C94.0 82.6 94.4 82.0 95.0 81.5C95.7 80.9 96.0 80.4 96.0 79.9C96.0 79.5 96.2 79.2 96.5 79.0C96.8 78.8 97.0 78.5 97.0 78.0C97.0 77.5 97.2 77.2 97.5 77.0C97.8 76.8 98.0 76.5 98.0 76.0C98.0 75.5 98.2 75.2 98.5 75.0C98.8 74.8 99.0 74.5 99.0 74.0C99.0 73.5 99.2 73.2 99.5 73.0C99.9 72.8 100.0 72.5 100.0 71.5C100.0 70.5 100.1 70.2 100.5 70.0C100.9 69.8 101.0 69.5 101.0 68.0C101.0 66.5 101.1 66.2 101.5 66.0C102.0 65.8 102.0 65.5 102.0 63.0C102.0 60.5 102.0 60.2 102.5 60.0C103.0 59.7 103.0 59.5 103.0 55.5C103.0 51.5 103.0 51.3 102.5 51.0C102.0 50.8 102.0 50.5 102.0 48.0C102.0 45.5 102.0 45.2 101.5 45.0C101.1 44.8 101.0 44.5 101.0 43.0C101.0 41.5 100.9 41.2 100.5 41.0C100.1 40.8 100.0 40.5 100.0 39.5C100.0 38.5 99.9 38.2 99.5 38.0C99.2 37.8 99.0 37.5 99.0 37.0C99.0 36.5 98.8 36.2 98.5 36.0C98.2 35.8 98.0 35.5 98.0 35.0C98.0 34.5 97.8 34.2 97.5 34.0C97.2 33.8 97.0 33.5 97.0 33.0C97.0 32.5 96.8 32.2 96.5 32.0C96.2 31.8 96.0 31.5 96.0 31.1C96.0 30.6 95.7 30.1 95.0 29.5C94.4 29.0 94.0 28.4 94.0 28.1C94.0 27.3 83.7 17.0 82.9 17.0C82.6 17.0 82.0 16.6 81.5 16.0C80.9 15.3 80.4 15.0 79.9 15.0C79.5 15.0 79.2 14.8 79.0 14.5C78.8 14.2 78.5 14.0 78.0 14.0C77.5 14.0 77.2 13.8 77.0 13.5C76.8 13.2 76.5 13.0 76.0 13.0C75.5 13.0 75.2 12.8 75.0 12.5C74.8 12.2 74.5 12.0 74.0 12.0C73.5 12.0 73.2 11.8 73.0 11.5C72.8 11.1 72.5 11.0 71.5 11.0C70.5 11.0 70.2 10.9 70.0 10.5C69.8 10.1 69.5 10.0 68.5 10.0C67.5 10.0 67.2 9.9 67.0 9.5C66.8 9.1 66.5 9.0 64.5 9.0C62.5 9.0 62.2 8.9 62.0 8.5C61.7 8.0 61.5 8.0 55.5 8.0C49.5 8.0 49.3 8.0 49.0 8.5C48.8 8.9 48.5 9.0 46.5 9.0C44.5 9.0 44.2 9.1 44.0 9.5C43.8 9.9 43.5 10.0 42.0 10.0C40.5 10.0 40.2 10.1 40.0 10.5C39.8 10.8 39.5 11.0 39.0 11.0C38.5 11.0 38.2 11.2 38.0 11.5C37.8 11.9 37.5 12.0 36.5 12.0C35.5 12.0 35.2 12.1 35.0 12.5C34.8 12.8 34.5 13.0 34.1 13.0C33.6 13.0 33.1 13.3 32.5 14.0C31.9 14.7 31.4 15.0 30.9 15.0C30.5 15.0 30.2 15.2 30.0 15.5C29.8 15.8 29.5 16.0 29.1 16.0C28.6 16.0 27.9 16.5 26.5 18.0C25.3 19.3 24.3 20.0 24.0 20.0C23.3 20.0 20.0 23.3 20.0 24.0C20.0 24.3 19.3 25.3 18.0 26.5C16.5 27.9 16.0 28.6 16.0 29.1C16.0 29.5 15.8 29.8 15.5 30.0C15.2 30.2 15.0 30.5 15.0 30.9C15.0 31.4 14.7 31.9 14.0 32.5C13.3 33.1 13.0 33.6 13.0 34.1C13.0 34.5 12.8 34.8 12.5 35.0C12.1 35.2 12.0 35.5 12.0 36.5C12.0 37.5 11.9 37.8 11.5 38.0C11.1 38.2 11.0 38.5 11.0 39.5C11.0 40.5 10.9 40.8 10.5 41.0C10.1 41.2 10.0 41.5 10.0 42.5C10.0 43.5 9.9 43.8 9.5 44.0C9.1 44.2 9.0 44.5 9.0 46.5C9.0 48.5 8.9 48.8 8.5 49.0C8.0 49.3 8.0 49.5 8.0 55.5C8.0 61.5 8.0 61.7 8.5 62.0C8.9 62.2 9.0 62.5 9.0 64.5C9.0 66.5 9.1 66.8 9.5 67.0C9.9 67.2 10.0 67.5 10.0 69.0C10.0 70.5 10.1 70.8 10.5 71.0C10.8 71.2 11.0 71.5 11.0 72.0C11.0 72.5 11.2 72.8 11.5 73.0C11.9 73.2 12.0 73.5 12.0 74.5C12.0 75.5 12.1 75.8 12.5 76.0C12.8 76.2 13.0 76.5 13.0 76.9C13.0 77.4 13.3 77.9 14.0 78.5C14.7 79.1 15.0 79.6 15.0 80.0C15.0 80.4 15.3 80.9 16.0 81.5C16.6 82.1 17.0 82.6 17.0 83.0C17.0 83.4 17.5 84.0 18.5 85.0C19.4 85.9 20.0 86.7 20.0 87.0C20.0 87.7 23.3 91.0 24.0 91.0C24.3 91.0 25.3 91.7 26.5 93.0C27.9 94.5 28.6 95.0 29.1 95.0C29.5 95.0 29.8 95.2 30.0 95.5C30.2 95.8 30.5 96.0 30.9 96.0C31.4 96.0 31.9 96.3 32.5 97.0C33.1 97.7 33.6 98.0 34.1 98.0C34.5 98.0 34.8 98.2 35.0 98.5C35.2 98.9 35.5 99.0 36.5 99.0C37.5 99.0 37.8 99.1 38.0 99.5C38.2 99.8 38.5 100.0 39.0 100.0C39.5 100.0 39.8 100.2 40.0 100.5C40.2 100.9 40.5 101.0 42.0 101.0C43.5 101.0 43.8 101.1 44.0 101.5C44.2 101.9 44.5 102.0 46.5 102.0C48.5 102.0 48.8 102.1 49.0 102.5C49.3 103.0 49.5 103.0 55.5 103.0C61.5 103.0 61.7 103.0 62.0 102.5ZM47.0 98.5C46.8 98.1 46.5 98.0 45.6 98.0C44.7 98.0 44.3 97.9 43.7 97.3L43.0 96.5L43.0 55.5L43.0 14.5L43.7 13.7C44.3 13.1 44.7 13.0 45.6 13.0C46.5 13.0 46.8 12.9 47.0 12.5C47.3 12.0 47.5 12.0 55.0 12.0C62.4 12.0 62.7 12.0 63.0 12.5C63.2 12.9 63.6 13.0 65.1 13.1L66.9 13.1L66.9 55.5L66.9 97.9L65.1 97.9C63.6 98.0 63.2 98.1 63.0 98.5C62.7 99.0 62.4 99.0 55.0 99.0C47.5 99.0 47.3 99.0 47.0 98.5ZM37.9 95.5C37.8 95.2 37.4 95.0 36.9 95.0C36.5 95.0 36.2 94.8 36.0 94.5C35.8 94.2 35.5 94.0 35.0 94.0C34.5 94.0 34.2 93.8 34.0 93.5C33.8 93.2 33.5 93.0 33.1 93.0C32.6 93.0 32.1 92.7 31.5 92.0C31.0 91.4 30.4 91.0 30.1 91.0C29.7 91.0 29.0 90.5 28.2 89.8L27.0 88.5L27.0 55.5L27.0 22.5L28.2 21.2C29.0 20.5 29.7 20.0 30.1 20.0C30.4 20.0 31.0 19.6 31.5 19.0C32.1 18.3 32.6 18.0 33.1 18.0C33.5 18.0 33.8 17.8 34.0 17.5C34.2 17.2 34.5 17.0 35.0 17.0C35.5 17.0 35.8 16.8 36.0 16.5C36.2 16.2 36.5 16.0 36.9 16.0C37.4 16.0 37.8 15.8 37.9 15.5C38.1 15.2 38.4 15.0 38.6 15.0C39.0 15.0 39.0 19.8 39.0 55.5C39.0 91.2 39.0 96.0 38.6 96.0C38.4 96.0 38.1 95.8 37.9 95.5ZM72.0 55.5C72.0 19.8 72.0 15.0 72.4 15.0C72.6 15.0 72.9 15.2 73.1 15.5C73.2 15.8 73.6 16.0 74.1 16.0C74.5 16.0 74.8 16.2 75.0 16.5C75.2 16.8 75.5 17.0 76.0 17.0C76.5 17.0 76.8 17.2 77.0 17.5C77.2 17.8 77.5 18.0 77.9 18.0C78.4 18.0 78.9 18.3 79.5 19.0C80.0 19.6 80.6 20.0 80.9 20.0C81.3 20.0 82.0 20.5 82.8 21.2L84.0 22.5L84.0 55.5L84.0 88.5L82.8 89.8C82.0 90.5 81.3 91.0 80.9 91.0C80.6 91.0 80.0 91.4 79.5 92.0C78.9 92.7 78.4 93.0 77.9 93.0C77.5 93.0 77.2 93.2 77.0 93.5C76.8 93.8 76.5 94.0 76.0 94.0C75.5 94.0 75.2 94.2 75.0 94.5C74.8 94.8 74.5 95.0 74.1 95.0C73.6 95.0 73.2 95.2 73.1 95.5C72.9 95.8 72.6 96.0 72.4 96.0C72.0 96.0 72.0 91.2 72.0 55.5ZM223.0 94.5C222.8 94.1 222.5 94.0 221.0 94.0C219.5 94.0 219.2 93.9 219.0 93.5C218.8 93.1 218.5 93.0 217.5 93.0C216.5 93.0 216.2 92.9 216.0 92.5C215.8 92.2 215.5 92.0 215.0 92.0C214.5 92.0 214.2 91.8 214.0 91.5C213.8 91.2 213.5 91.0 213.1 91.0C212.3 91.0 205.0 83.8 205.0 82.9C205.0 82.6 204.6 82.0 204.0 81.5C203.1 80.7 203.0 80.5 203.0 79.4C203.0 78.5 202.9 78.2 202.5 78.0C202.1 77.8 202.0 77.5 202.0 76.5C202.0 75.5 201.9 75.2 201.5 75.0C201.0 74.7 201.0 74.5 201.1 45.9L201.1 17.1L208.5 17.1L215.9 17.1L215.9 43.4C216.0 69.4 216.0 69.7 216.5 70.0C216.9 70.2 217.0 70.5 217.0 72.0C217.0 73.5 217.1 73.8 217.5 74.0C217.8 74.2 218.0 74.5 218.0 74.9C218.0 75.8 222.2 80.0 223.1 80.0C223.5 80.0 223.8 80.2 224.0 80.5C224.2 80.9 224.5 81.0 226.0 81.0C227.5 81.0 227.8 81.1 228.0 81.5C228.2 81.9 228.5 82.0 229.5 82.0C230.5 82.0 230.8 81.9 231.0 81.5C231.2 81.1 231.5 81.0 233.0 81.0C234.5 81.0 234.8 80.9 235.0 80.5C235.2 80.2 235.5 80.0 235.9 80.0C236.3 80.0 237.1 79.4 238.8 77.8C240.4 76.1 241.0 75.3 241.0 74.9C241.0 74.5 241.2 74.2 241.5 74.0C242.0 73.7 242.0 73.5 242.0 46.1L242.0 18.5L242.7 17.7L243.5 17.0L250.0 17.0L256.5 17.0L257.3 17.7L258.0 18.5L258.0 45.6C258.0 72.5 258.0 72.7 257.5 73.0C257.1 73.2 257.0 73.5 257.0 75.0C257.0 76.5 256.9 76.8 256.5 77.0C256.1 77.2 256.0 77.5 256.0 78.5C256.0 79.5 255.9 79.8 255.5 80.0C255.2 80.2 255.0 80.5 255.0 81.0C255.0 81.5 254.8 81.8 254.5 82.0C254.2 82.2 254.0 82.5 254.0 82.9C254.0 83.7 247.8 90.0 246.9 90.0C246.6 90.0 246.0 90.4 245.5 91.0C244.7 91.9 244.5 92.0 243.4 92.0C242.5 92.0 242.2 92.1 242.0 92.5C241.8 92.8 241.5 93.0 241.0 93.0C240.5 93.0 240.2 93.2 240.0 93.5C239.8 93.9 239.5 94.0 237.5 94.0C235.5 94.0 235.2 94.1 235.0 94.5C234.7 95.0 234.5 95.0 229.0 95.0C223.5 95.0 223.3 95.0 223.0 94.5ZM133.1 93.7C133.1 93.5 133.0 76.2 133.1 55.2L133.1 17.1L140.5 17.1L147.9 17.1L148.0 32.5L148.1 47.9L160.5 47.9L172.9 47.9L172.9 33.2L173.0 18.5L173.7 17.7L174.5 17.0L181.7 17.1L188.9 17.1L188.9 55.5L188.9 93.9L181.7 93.9L174.5 94.0L173.7 93.3L173.0 92.5L172.9 77.3L172.9 62.1L160.5 62.1L148.1 62.1L148.0 78.0L147.9 93.9L140.6 93.9C134.8 94.0 133.2 93.9 133.1 93.7ZM270.7 93.3L270.0 92.5L270.0 55.5L270.0 18.5L270.7 17.7L271.5 17.0L278.5 17.0L285.5 17.0L286.3 17.7C286.7 18.1 287.0 18.7 287.0 19.0C287.0 19.4 287.4 20.0 288.0 20.5C288.7 21.1 289.0 21.6 289.0 22.1C289.0 22.5 289.2 22.8 289.5 23.0C289.8 23.2 290.0 23.5 290.0 23.9C290.0 24.4 290.3 24.9 291.0 25.5C291.7 26.1 292.0 26.6 292.0 27.0C292.0 27.4 292.3 27.9 293.0 28.5C293.7 29.1 294.0 29.6 294.0 30.0C294.0 30.4 294.3 30.9 295.0 31.5C295.7 32.1 296.0 32.6 296.0 33.0C296.0 33.4 296.3 33.9 297.0 34.5C297.7 35.1 298.0 35.6 298.0 36.1C298.0 36.5 298.2 36.8 298.5 37.0C298.8 37.2 299.0 37.5 299.0 37.9C299.0 38.4 299.3 38.9 300.0 39.5C300.6 40.0 301.0 40.6 301.0 41.0C301.0 41.7 302.3 43.0 303.0 43.0C303.7 43.0 305.0 41.7 305.0 40.9C305.0 40.5 305.2 40.2 305.5 40.0C305.8 39.8 306.0 39.5 306.0 39.1C306.0 38.6 306.3 38.1 307.0 37.5C307.7 36.9 308.0 36.4 308.0 36.0C308.0 35.6 308.3 35.1 309.0 34.5C309.7 33.9 310.0 33.4 310.0 33.0C310.0 32.6 310.3 32.1 311.0 31.5C311.7 30.9 312.0 30.4 312.0 30.0C312.0 29.6 312.3 29.1 313.0 28.5C313.7 27.9 314.0 27.4 314.0 27.0C314.0 26.6 314.3 26.1 315.0 25.5C315.7 24.9 316.0 24.4 316.0 23.9C316.0 23.5 316.2 23.2 316.5 23.0C316.8 22.8 317.0 22.5 317.0 22.1C317.0 21.6 317.3 21.1 318.0 20.5C318.6 20.0 319.0 19.4 319.0 19.0C319.0 18.7 319.3 18.1 319.7 17.7L320.5 17.0L327.5 17.0L334.5 17.0L335.3 17.7L336.0 18.5L336.0 55.5L336.0 92.5L335.3 93.3L334.5 94.0L327.3 93.9L320.1 93.9L320.1 69.3C320.0 55.7 320.0 44.5 319.9 44.3C319.6 43.6 319.0 44.0 319.0 44.8C319.0 45.4 318.8 45.8 318.0 46.5C317.3 47.1 317.0 47.6 317.0 48.0C317.0 48.4 316.7 48.9 316.0 49.5C315.3 50.1 315.0 50.6 315.0 51.0C315.0 51.4 314.7 51.9 314.0 52.5C313.3 53.1 313.0 53.6 313.0 54.1C313.0 54.5 312.8 54.8 312.5 55.0C312.2 55.2 312.0 55.5 312.0 55.9C312.0 56.4 311.7 56.9 311.0 57.5C310.4 58.1 310.0 58.6 310.0 59.0C310.0 59.4 309.6 59.9 309.0 60.5C308.4 61.1 308.0 61.6 308.0 62.1L307.9 62.9L303.0 62.9L298.1 62.9L298.0 62.1C298.0 61.6 297.6 61.1 297.0 60.5C296.4 59.9 296.0 59.4 296.0 59.0C296.0 58.6 295.6 58.1 295.0 57.5C294.3 56.9 294.0 56.4 294.0 55.9C294.0 55.5 293.8 55.2 293.5 55.0C293.2 54.8 293.0 54.5 293.0 54.1C293.0 53.6 292.7 53.1 292.0 52.5C291.3 51.9 291.0 51.4 291.0 51.0C291.0 50.6 290.7 50.1 290.0 49.5C289.3 48.9 289.0 48.4 289.0 48.0C289.0 47.6 288.7 47.1 288.0 46.5C287.2 45.8 287.0 45.4 287.0 44.8C287.0 44.0 286.4 43.6 286.1 44.3C286.0 44.5 286.0 55.7 285.9 69.3L285.9 93.9L278.6 93.9L271.4 94.0L270.7 93.3ZM344.2 93.8C344.1 93.7 344.0 93.1 344.0 92.5C344.0 91.5 344.1 91.2 344.5 91.0C344.9 90.8 345.0 90.5 345.0 89.5C345.0 88.5 345.1 88.2 345.5 88.0C345.9 87.8 346.0 87.5 346.0 86.5C346.0 85.5 346.1 85.2 346.5 85.0C346.9 84.8 347.0 84.5 347.0 83.5C347.0 82.5 347.1 82.2 347.5 82.0C347.9 81.8 348.0 81.5 348.0 80.5C348.0 79.5 348.1 79.2 348.5 79.0C348.9 78.8 349.0 78.5 349.0 77.5C349.0 76.5 349.1 76.2 349.5 76.0C349.9 75.8 350.0 75.5 350.0 74.5C350.0 73.5 350.1 73.2 350.5 73.0C350.9 72.8 351.0 72.5 351.0 71.0C351.0 69.5 351.1 69.2 351.5 69.0C351.9 68.8 352.0 68.5 352.0 67.5C352.0 66.5 352.1 66.2 352.5 66.0C352.9 65.8 353.0 65.5 353.0 64.5C353.0 63.5 353.1 63.2 353.5 63.0C353.9 62.8 354.0 62.5 354.0 61.5C354.0 60.5 354.1 60.2 354.5 60.0C354.9 59.8 355.0 59.5 355.0 58.5C355.0 57.5 355.1 57.2 355.5 57.0C355.9 56.8 356.0 56.5 356.0 55.5C356.0 54.5 356.1 54.2 356.5 54.0C356.9 53.8 357.0 53.5 357.0 52.5C357.0 51.5 357.1 51.2 357.5 51.0C357.9 50.8 358.0 50.5 358.0 49.5C358.0 48.5 358.1 48.2 358.5 48.0C358.9 47.8 359.0 47.5 359.0 46.0C359.0 44.5 359.1 44.2 359.5 44.0C359.9 43.8 360.0 43.5 360.0 42.5C360.0 41.5 360.1 41.2 360.5 41.0C360.9 40.8 361.0 40.5 361.0 39.5C361.0 38.5 361.1 38.2 361.5 38.0C361.9 37.8 362.0 37.5 362.0 36.5C362.0 35.5 362.1 35.2 362.5 35.0C362.9 34.8 363.0 34.5 363.0 33.5C363.0 32.5 363.1 32.2 363.5 32.0C363.9 31.8 364.0 31.5 364.0 30.5C364.0 29.5 364.1 29.2 364.5 29.0C364.9 28.8 365.0 28.5 365.0 27.5C365.0 26.5 365.1 26.2 365.5 26.0C365.9 25.8 366.0 25.5 366.0 24.0C366.0 22.5 366.1 22.2 366.5 22.0C366.9 21.8 367.0 21.5 367.0 20.5C367.0 19.5 367.1 19.2 367.5 19.0C367.8 18.9 368.0 18.4 368.0 17.9L368.1 17.1L378.0 17.1L387.9 17.1L388.0 18.4C388.0 19.4 388.1 19.8 388.5 20.0C388.9 20.2 389.0 20.5 389.0 21.5C389.0 22.5 389.1 22.8 389.5 23.0C389.9 23.2 390.0 23.5 390.0 24.5C390.0 25.5 390.1 25.8 390.5 26.0C390.9 26.2 391.0 26.5 391.0 27.5C391.0 28.5 391.1 28.8 391.5 29.0C391.9 29.2 392.0 29.5 392.0 30.5C392.0 31.5 392.1 31.8 392.5 32.0C392.9 32.2 393.0 32.5 393.0 33.5C393.0 34.5 393.1 34.8 393.5 35.0C393.9 35.2 394.0 35.5 394.0 36.5C394.0 37.5 394.1 37.8 394.5 38.0C394.9 38.2 395.0 38.5 395.0 40.0C395.0 41.5 395.1 41.8 395.5 42.0C395.9 42.2 396.0 42.5 396.0 43.5C396.0 44.5 396.1 44.8 396.5 45.0C396.9 45.2 397.0 45.5 397.0 46.5C397.0 47.5 397.1 47.8 397.5 48.0C397.9 48.2 398.0 48.5 398.0 49.5C398.0 50.5 398.1 50.8 398.5 51.0C398.9 51.2 399.0 51.5 399.0 52.5C399.0 53.5 399.1 53.8 399.5 54.0C399.9 54.2 400.0 54.5 400.0 55.5C400.0 56.5 400.1 56.8 400.5 57.0C400.9 57.2 401.0 57.5 401.0 58.5C401.0 59.5 401.1 59.8 401.5 60.0C401.9 60.2 402.0 60.5 402.0 62.0C402.0 63.5 402.1 63.8 402.5 64.0C402.9 64.2 403.0 64.5 403.0 65.5C403.0 66.5 403.1 66.8 403.5 67.0C403.9 67.2 404.0 67.5 404.0 68.5C404.0 69.5 404.1 69.8 404.5 70.0C404.9 70.2 405.0 70.5 405.0 71.5C405.0 72.5 405.1 72.8 405.5 73.0C405.9 73.2 406.0 73.5 406.0 74.5C406.0 75.5 406.1 75.8 406.5 76.0C406.9 76.2 407.0 76.5 407.0 77.5C407.0 78.5 407.1 78.8 407.5 79.0C407.9 79.2 408.0 79.5 408.0 80.5C408.0 81.5 408.1 81.8 408.5 82.0C408.9 82.2 409.0 82.5 409.0 84.0C409.0 85.5 409.1 85.8 409.5 86.0C409.9 86.2 410.0 86.5 410.0 87.5C410.0 88.5 410.1 88.8 410.5 89.0C410.9 89.2 411.0 89.5 411.0 90.5C411.0 91.5 411.1 91.8 411.5 92.0C411.9 92.2 412.0 92.5 412.0 93.1L411.9 93.9L404.2 93.9L396.5 94.0L395.7 93.3C395.3 92.8 395.0 92.3 395.0 91.9C395.0 91.5 394.8 91.2 394.5 91.0C394.1 90.8 394.0 90.5 394.0 89.0C394.0 87.5 393.9 87.2 393.5 87.0C393.1 86.8 393.0 86.5 393.0 85.5C393.0 84.5 392.9 84.2 392.5 84.0C392.2 83.9 392.0 83.4 392.0 82.9L391.9 82.1L378.2 82.1L364.5 82.0L363.7 82.7C363.1 83.4 363.0 83.6 363.0 85.1C363.0 86.5 362.9 86.8 362.5 87.0C362.1 87.2 362.0 87.5 362.0 88.5C362.0 89.5 361.9 89.8 361.5 90.0C361.1 90.2 361.0 90.5 361.0 91.4C361.0 92.3 360.9 92.7 360.3 93.3L359.5 94.0L351.9 94.0C347.8 94.0 344.3 93.9 344.2 93.8ZM420.7 93.3L420.0 92.5L420.0 55.5L420.0 18.5L420.7 17.7L421.5 17.0L428.0 17.0L434.5 17.0L435.8 18.2C436.6 19.1 437.0 19.7 437.0 20.1C437.0 20.5 437.2 20.8 437.5 21.0C437.8 21.2 438.0 21.5 438.0 21.9C438.0 22.4 438.3 22.9 439.0 23.5C439.7 24.1 440.0 24.6 440.0 25.1C440.0 25.5 440.2 25.8 440.5 26.0C440.8 26.2 441.0 26.5 441.0 26.9C441.0 27.4 441.3 27.9 442.0 28.5C442.7 29.1 443.0 29.6 443.0 30.1C443.0 30.5 443.2 30.8 443.5 31.0C443.8 31.2 444.0 31.5 444.0 31.9C444.0 32.4 444.3 32.9 445.0 33.5C445.7 34.1 446.0 34.6 446.0 35.1C446.0 35.5 446.2 35.8 446.5 36.0C446.8 36.2 447.0 36.5 447.0 36.9C447.0 37.4 447.3 37.9 448.0 38.5C448.7 39.1 449.0 39.6 449.0 40.1C449.0 40.5 449.2 40.8 449.5 41.0C449.8 41.2 450.0 41.5 450.0 41.9C450.0 42.4 450.3 42.9 451.0 43.5C451.7 44.1 452.0 44.6 452.0 45.1C452.0 45.5 452.2 45.8 452.5 46.0C452.8 46.2 453.0 46.5 453.0 46.9C453.0 47.4 453.3 47.9 454.0 48.5C454.7 49.1 455.0 49.6 455.0 50.0C455.0 50.4 455.3 50.9 456.0 51.5C456.7 52.1 457.0 52.6 457.0 53.1C457.0 53.5 457.2 53.8 457.5 54.0C457.8 54.2 458.0 54.5 458.0 54.9C458.0 55.4 458.3 55.9 459.0 56.5C459.7 57.1 460.0 57.6 460.0 58.1C460.0 58.5 460.2 58.8 460.5 59.0C460.8 59.2 461.0 59.5 461.0 59.9C461.0 60.4 461.3 60.9 462.0 61.5C462.6 62.1 463.0 62.6 463.0 63.1C463.1 63.7 463.3 63.9 463.8 64.0C464.9 64.1 465.2 63.6 464.5 62.9L464.0 62.3L464.0 40.4L464.0 18.5L464.7 17.7L465.5 17.0L472.7 17.0L480.0 17.0L480.0 55.5L480.0 94.0L472.7 94.0L465.5 94.0L464.7 93.3C464.3 92.9 464.0 92.3 464.0 92.0C464.0 91.6 463.6 91.0 463.0 90.5C462.3 89.9 462.0 89.4 462.0 88.9C462.0 88.5 461.8 88.2 461.5 88.0C461.2 87.8 461.0 87.5 461.0 87.1C461.0 86.6 460.7 86.1 460.0 85.5C459.3 84.9 459.0 84.4 459.0 83.9C459.0 83.5 458.8 83.2 458.5 83.0C458.2 82.8 458.0 82.5 458.0 82.1C458.0 81.6 457.7 81.1 457.0 80.5C456.3 79.9 456.0 79.4 456.0 78.9C456.0 78.5 455.8 78.2 455.5 78.0C455.2 77.8 455.0 77.5 455.0 77.1C455.0 76.6 454.7 76.1 454.0 75.5C453.3 74.9 453.0 74.4 453.0 73.9C453.0 73.5 452.8 73.2 452.5 73.0C452.2 72.8 452.0 72.5 452.0 72.1C452.0 71.6 451.7 71.1 451.0 70.5C450.3 69.9 450.0 69.4 450.0 68.9C450.0 68.5 449.8 68.2 449.5 68.0C449.2 67.8 449.0 67.5 449.0 67.1C449.0 66.6 448.7 66.1 448.0 65.5C447.3 64.9 447.0 64.4 447.0 63.9C447.0 63.5 446.8 63.2 446.5 63.0C446.2 62.8 446.0 62.5 446.0 62.1C446.0 61.6 445.7 61.1 445.0 60.5C444.3 59.9 444.0 59.4 444.0 59.0C444.0 58.6 443.7 58.1 443.0 57.5C442.3 56.9 442.0 56.4 442.0 55.9C442.0 55.5 441.8 55.2 441.5 55.0C441.2 54.8 441.0 54.5 441.0 54.1C441.0 53.6 440.7 53.1 440.0 52.5C439.3 51.9 439.0 51.4 439.0 50.9C439.0 50.5 438.8 50.2 438.5 50.0C438.2 49.8 438.0 49.5 438.0 49.1C438.0 48.4 436.9 47.0 436.3 47.0C436.1 47.0 436.0 51.9 435.9 70.4L435.9 93.9L428.6 93.9L421.4 94.0L420.7 93.3ZM388.0 69.1C388.0 68.5 387.9 68.2 387.5 68.0C387.1 67.8 387.0 67.5 387.0 66.0C387.0 64.5 386.9 64.2 386.5 64.0C386.1 63.8 386.0 63.5 386.0 62.5C386.0 61.5 385.9 61.2 385.5 61.0C385.1 60.8 385.0 60.5 385.0 59.5C385.0 58.5 384.9 58.2 384.5 58.0C384.1 57.8 384.0 57.5 384.0 56.0C384.0 54.5 383.9 54.2 383.5 54.0C383.1 53.8 383.0 53.5 383.0 52.5C383.0 51.5 382.9 51.2 382.5 51.0C382.1 50.8 382.0 50.5 382.0 49.5C382.0 48.5 381.9 48.2 381.5 48.0C381.1 47.8 381.0 47.5 381.0 46.0C381.0 44.5 380.9 44.2 380.5 44.0C380.1 43.8 380.0 43.5 380.0 42.5C380.0 41.5 379.9 41.2 379.5 41.0C379.1 40.8 379.0 40.5 379.0 39.6C379.0 38.7 378.9 38.3 378.3 37.7C377.3 36.6 377.0 36.8 377.0 38.4C377.0 39.5 376.9 39.8 376.5 40.0C376.1 40.2 376.0 40.5 376.0 41.5C376.0 42.5 375.9 42.8 375.5 43.0C375.1 43.2 375.0 43.5 375.0 44.5C375.0 45.5 374.9 45.8 374.5 46.0C374.1 46.2 374.0 46.5 374.0 48.0C374.0 49.5 373.9 49.8 373.5 50.0C373.1 50.2 373.0 50.5 373.0 51.5C373.0 52.5 372.9 52.8 372.5 53.0C372.1 53.2 372.0 53.5 372.0 55.0C372.0 56.5 371.9 56.8 371.5 57.0C371.1 57.2 371.0 57.5 371.0 58.5C371.0 59.5 370.9 59.8 370.5 60.0C370.1 60.2 370.0 60.5 370.0 61.5C370.0 62.5 369.9 62.8 369.5 63.0C369.1 63.2 369.0 63.5 369.0 65.0C369.0 66.5 368.9 66.8 368.5 67.0C368.1 67.2 368.0 67.5 368.0 68.5C368.0 69.1 368.1 69.7 368.2 69.8C368.3 69.9 372.7 70.0 378.1 69.9L387.9 69.9L388.0 69.1Z"/>
+  </defs>
+  <defs>
+    <symbol id="hl" viewBox="0 0 480 111"><use href="#hp"/></symbol>
+    <symbol id="hm" viewBox="0 0 111 111"><use href="#hp"/></symbol>
+    <symbol id="ck" viewBox="0 0 12 12"><path d="M2.5 6.2l2.3 2.3 4.7-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="spark" viewBox="0 0 24 24"><path d="M12 3c.8 4.2 3.8 7.2 8 8-4.2.8-7.2 3.8-8 8-.8-4.2-3.8-7.2-8-8 4.2-.8 7.2-3.8 8-8z" fill="#fff"/></symbol>
+    <symbol id="shoe" viewBox="0 0 220 110"><path d="M14 72c0-10 6-16 14-18l38-8c10-2 18-10 26-20l8-10c4-5 12-5 15 1l10 18c5 9 15 14 26 15l34 4c14 2 23 12 23 25v5H14z" fill="#0F766E"/><path d="M102 22l10 18M90 33l10 17M78 41l9 15" stroke="#CCFBF1" stroke-width="4" stroke-linecap="round"/><path d="M60 64c30 6 70 6 120-2" stroke="#F59E0B" stroke-width="6" fill="none" stroke-linecap="round"/><rect x="10" y="84" width="200" height="16" rx="8" fill="#1F2937"/><rect x="10" y="84" width="200" height="6" rx="3" fill="#F3F4F6" opacity=".9"/></symbol>
+  </defs>
+</svg>
+
+<div class="app">
+  <header class="top"><svg class="hlogo" role="img" aria-label="HUMAN"><use href="#hl"/></svg><span class="div"></span><small>Sightline · AgenticTrust</small></header>
+  <main class="stage">
+    <section class="cap" id="cap" aria-live="polite"></section>
+    <section class="vis" id="vis"></section>
+  </main>
+  <footer class="ctrl">
+    <div class="tl" id="tl" role="group" aria-label="Scenes"></div>
+    <div class="btns">
+      <button id="bPrev" aria-label="Previous scene" title="Previous (←)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+      <button id="bPlay" class="main" aria-label="Pause" title="Play or pause (space)"></button>
+      <button id="bNext" aria-label="Next scene" title="Next (→)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
+    </div>
+    <div class="note">Illustrative. Brightwell Supply is a fictional retailer.</div>
+  </footer>
+</div>
+
+<script>
+(function(){
+const H='<svg class="hmark"><use href="#hm"/></svg>';
+const LOGO='<svg class="hlogo" role="img" aria-label="HUMAN"><use href="#hl"/></svg>';
+const AG='<span class="agent-ic"><svg><use href="#spark"/></svg></span>';
+const CK='<svg viewBox="0 0 12 12"><use href="#ck"/></svg>';
+const SHOE='<svg viewBox="0 0 220 110"><use href="#shoe"/></svg>';
+const ASK='Grab the Aero Runner Low in a size 10 from Brightwell Supply when it drops.';
+const URL='brightwellsupply.com/aero-runner-low';
+
+const me={f:'me',t:ASK}, onit={f:'ag',t:'On it. Heading to Brightwell Supply now.'}, got={f:'ag',t:'Got them. Aero Runner Low, size 10, arriving Friday.'};
+
+const head=(r)=>`<div class="mh"><span class="wm"><i></i>Brightwell Supply</span><span class="sp"></span><span>New arrivals</span><span>Men</span><span>Women</span>${r||''}</div>`;
+const PAGES={
+  product:o=>`${head()}${o.banner?vbar():''}<div class="prod"><div class="art">${SHOE}</div><div><span class="badge">Limited release</span><h2>Aero Runner Low</h2><div class="sub">Men's running shoe · Teal / Amber</div><div class="price">$140</div><div class="sizes"><span>8</span><span>9</span><span class="sel">10</span><span>11</span></div><span class="cta${o.dim?' dim':''}">Add to cart</span></div></div>`,
+  cart:o=>`${head()}<div class="cart"><h2>Your cart</h2><div class="row"><span class="th">${SHOE}</span><span><b>Aero Runner Low</b><small>Size 10 · Teal / Amber</small></span><span class="pr">$140</span></div><span class="pill bad">Checkout never completed</span></div><div class="stamp">Lost sale</div>`,
+  cartok:o=>`${head()}${vbar('browse & add to cart: allowed')}<div class="cart"><h2>Your cart</h2><div class="row"><span class="th">${SHOE}</span><span><b>Aero Runner Low</b><small>Size 10 · Teal / Amber</small></span><span class="pr">$140</span></div><span class="cta" style="margin-top:16px">Proceed to checkout</span></div>`,
+  checkout:o=>`${head()}<div class="co"><div><h2>Checkout</h2><div class="box"><b>Ship to</b>Saved address · arrives Friday</div><div class="box"><b>Payment</b>Saved card</div></div><div class="sum"><div><span>Aero Runner Low</span><span>$140.00</span></div><div><span>Shipping</span><span>Free</span></div><div class="t"><span>Total</span><span>$140.00</span></div><span class="cta" style="margin-top:12px">Place order</span></div></div>`,
+  done:o=>`${head()}${o.banner?vbar(o.banner===true?'':o.banner):''}<div class="done"><div class="ok">${CK}</div><h2>Order placed</h2><p>Aero Runner Low · size 10 · $140 · arriving Friday</p></div>`,
+};
+function vbar(t){return `<div class="vbar">${H}<span><b>AI shopping agent</b> · ${t||'allowed by your policy'}</span><span class="sp"></span><span>HUMAN Sightline</span></div>`}
+const HOLD=`<div class="veil light"><div class="hcard">${H}<h3>Before we continue…</h3><p>Press & Hold to confirm you are a human (and not a bot).</p><div class="hold idle"><span class="fill"></span><span class="lbl">Press & Hold</span></div><span class="who">${AG}AI shopping agent stopped at checkout</span><div class="by">HUMAN · checkout challenge per your policy</div></div></div>`;
+const CAPTCHA=`<div class="veil"><div class="cap-card"><h3>Quick check</h3><p>Slide to confirm you're human.</p><div class="slider"><span class="lbl">Slide to verify</span><span class="knob"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div><div class="cap-err">Verification failed. Try again.</div><span class="stuck">${AG}AI shopping agent can't continue</span></div></div>`;
+
+const POLHEAD=`<div class="panel-h">${H}HUMAN Sightline</div>`;
+const PANELS={
+  steps:`<div class="panel dark">${POLHEAD}<div class="panel-b">
+    <div class="prow"><span>Visitor</span><span>AI shopping agent</span></div>
+    <div class="prow"><span>Acting for</span><span>A shopper</span></div>
+    <div class="panel-sub">Policy · AI shopping agents</div>
+    <div class="steps"><div class="st"><span>Browse & search</span><span class="chip allow">Allow</span></div>
+    <div class="st"><span>Add to cart</span><span class="chip allow">Allow</span></div>
+    <div class="st hi"><span>Checkout</span><span class="chip challenge">Challenge</span></div></div>
+    <div class="seg"><span>Allow</span><span class="on amber">Challenge</span><span>Block</span><span>Rate-limit</span></div>
+    <div class="panel-sub">Other agents</div>
+    <div class="others"><span>AI crawlers · Rate-limit</span><span>Unknown automation · Challenge</span><span>Scraper bots · Block</span></div></div></div>`,
+  shopping:`<div class="panel dark">${POLHEAD}<div class="panel-b">
+    <div class="prow"><span>Visitor</span><span>AI shopping agent</span></div>
+    <div class="steps"><div class="st past"><span>Browse & search</span><span class="r"><span class="tick">✓</span>Allowed</span></div>
+    <div class="st past"><span>Add to cart</span><span class="r"><span class="tick">✓</span>Allowed</span></div>
+    <div class="st hi"><span>Checkout</span><span class="chip challenge">Next · Challenge</span></div></div></div></div>`,
+  holding:`<div class="panel dark">${POLHEAD}<div class="panel-b">
+    <div class="prow"><span>Visitor</span><span>AI shopping agent</span></div>
+    <div class="prow"><span>Step</span><span>Checkout</span></div>
+    <div class="prow"><span>Policy</span><span>Challenge a person</span></div>
+    <div class="prow"><span>Status</span><span>Agent stopped here</span></div></div></div>`,
+  confirmed:`<div class="panel dark">${POLHEAD}<div class="panel-b">
+    <div class="steps"><div class="st past"><span>Browse & search</span><span class="r"><span class="tick">✓</span>Agent</span></div>
+    <div class="st past"><span>Add to cart</span><span class="r"><span class="tick">✓</span>Agent</span></div>
+    <div class="st past"><span>Checkout</span><span class="r"><span class="tick">✓</span>Shopper, no agent</span></div></div>
+    <div class="prow" style="margin-top:6px"><span>Outcome</span><span class="g">Order placed · $140</span></div></div></div>`,
+  analytics:`<div class="panel light"><div class="panel-h">Your analytics · this session</div><div class="panel-b">
+    <div class="prow"><span>Visitor</span><span>Chrome · Windows</span></div>
+    <div class="prow"><span>Source</span><span>Direct</span></div>
+    <div class="prow"><span>AI agent</span><span class="w">Not detected</span></div>
+    <div class="prow"><span>Acting for</span><span class="q">Unknown</span></div>
+    <div class="teams"><span>Marketing: a normal visit</span><span>Security: no signal</span></div></div></div>`,
+  policy:`<div class="panel dark"><div class="panel-h">${H}HUMAN Sightline</div><div class="panel-b">
+    <div class="prow"><span>Visitor</span><span>AI shopping agent</span></div>
+    <div class="prow"><span>Acting for</span><span>A shopper</span></div>
+    <div class="prow"><span>Activity</span><span>Product page → cart</span></div>
+    <div class="panel-sub">Your agent policy</div>
+    <div class="pol"><div class="pr hi"><span>AI shopping agents</span><span class="chip allow">Allow</span></div>
+    <div class="seg"><span class="on">Allow</span><span>Challenge</span><span>Block</span><span>Rate-limit</span></div>
+    <div class="pr"><span>AI crawlers</span><span class="chip limit">Rate-limit</span></div>
+    <div class="pr"><span>Unknown automation</span><span class="chip challenge">Challenge</span></div>
+    <div class="pr"><span>Scraper bots</span><span class="chip block">Block</span></div></div></div></div>`,
+  allowed:`<div class="panel dark"><div class="panel-h">${H}HUMAN Sightline</div><div class="panel-b">
+    <div class="prow"><span>Visitor</span><span>AI shopping agent</span></div>
+    <div class="prow"><span>Decision</span><span class="g">Allowed by your policy</span></div>
+    <div class="prow"><span>Friction</span><span>None</span></div>
+    <div class="prow"><span>Outcome</span><span>Order placed · $140</span></div></div></div>`,
+};
+
+const BOARDS={
+  switch:`<div class="switch-card">${LOGO}<div class="t"><h2>Agentic visibility</h2><span class="toggle"><i></i></span></div><p class="sub">HUMAN Sightline</p><ul>
+    <li style="animation-delay:2.2s"><i>${CK}</i>See every AI agent on your site</li>
+    <li style="animation-delay:2.7s"><i>${CK}</i>Allow, challenge, block or rate-limit each step</li>
+    <li style="animation-delay:3.2s"><i>${CK}</i>Share agent activity with every team</li></ul></div>`,
+  share:`<div class="share"><div class="hub">${H}<span><b>HUMAN Sightline</b><span>Agent built the cart · shopper checked out · $140</span></span></div>
+    <svg class="wires" viewBox="0 0 600 90" preserveAspectRatio="none" aria-hidden="true"><path d="M300 0V36H100V90"/><path d="M300 0V90"/><path d="M300 36H500V90"/></svg>
+    <div class="tiles"><div class="tile" style="animation-delay:1s"><h3>Marketing</h3><p>The order is attributed to an AI shopping agent in analytics.</p><span class="k">Analytics</span></div>
+    <div class="tile" style="animation-delay:1.6s"><h3>Ecommerce</h3><p>The agent built the cart; the shopper checked out.</p><span class="k">Conversion</span></div>
+    <div class="tile" style="animation-delay:2.2s"><h3>Security</h3><p>The agent was stopped at checkout, exactly as the policy says.</p><span class="k">Policy</span></div></div></div>`,
+  end:`<div class="end">${LOGO}</div>`,
+};
+
+const W={k:'without',t:'Without agentic visibility'}, WI={k:'with',t:'With HUMAN Sightline'}, TD={k:'today',t:'Agentic commerce'};
+const S=[
+ {tag:TD, cap:'Your customers are sending AI agents to shop for them.', dur:6500, focus:'phone', msgs:[], typing:ASK, b:{page:'product'}},
+ {tag:W, cap:'Treat every agent like a bot, and it hits a wall.', dur:7000, focus:'all', msgs:[me,onit,{f:'ag',t:'Brightwell Supply is asking me to prove I’m human, and I can’t get past it. Can you finish this step yourself?'}], b:{page:'product', dim:true, captcha:true}},
+ {tag:W, cap:'Lost sale.', dur:4500, focus:'browser', msgs:[me,onit,{f:'ag',t:'Brightwell Supply is asking me to prove I’m human, and I can’t get past it. Can you finish this step yourself?'},{f:'sys',t:'No reply · task paused'}], b:{page:'cart', url:'brightwellsupply.com/cart'}},
+ {tag:W, cap:'Or it walks right in looking like any Chrome user, and every team is flying blind.', dur:8000, focus:'browser', msgs:[me,onit,got], b:{page:'done', url:'brightwellsupply.com/order/confirmed'}, panel:'analytics'},
+ {tag:WI, cap:'Turn on agentic visibility with HUMAN Sightline.', dur:5500, board:'switch'},
+ {tag:WI, cap:'Know every agent. Set a rule for every step.', dur:8000, focus:'browser', msgs:[me,onit], b:{page:'product', prot:true}, panel:'steps'},
+ {tag:WI, cap:'Let it shop...', dur:5000, focus:'browser', msgs:[me,onit,{f:'sys',t:'Added to cart'}], b:{page:'cartok', url:'brightwellsupply.com/cart', prot:true}, panel:'shopping'},
+ {tag:WI, cap:'...but keep checkout for people, if that’s your policy.', dur:8000, focus:'all', msgs:[me,onit,{f:'sys',t:'Added to cart'},{f:'ag',t:'Brightwell Supply doesn’t let agents check out limited releases, so I stopped there. Your cart is saved. Here’s the link to finish checkout.',opts:['brightwellsupply.com/cart']}], b:{page:'checkout', url:'brightwellsupply.com/checkout', prot:true, hold:true}, panel:'holding'},
+ {tag:WI, cap:'Granular controls, aligned to your business policy. The sale still goes through.', dur:6500, focus:'all', msgs:[me,onit,{f:'sys',t:'Added to cart'},{f:'ag',t:'Brightwell Supply doesn’t let agents check out limited releases, so I stopped there. Your cart is saved. Here’s the link to finish checkout.',opts:['brightwellsupply.com/cart']},{f:'sys',t:'You checked out on brightwellsupply.com'}], b:{page:'done', url:'brightwellsupply.com/order/confirmed', banner:'built the cart · checkout completed by the shopper', prot:true}, panel:'confirmed'},
+ {tag:WI, cap:'Every team sees what agents did.', dur:7000, board:'share'},
+ {tag:null, cap:'Agentic-ready with HUMAN.', dur:4500, board:'end'},
+];
+
+const $=id=>document.getElementById(id);
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let i=0, playing=true, timer=null, typer=null, prevI=-1;
+
+function phoneHTML(s,prev){
+  const keep = prev && prev.msgs ? prev.msgs.length : 0;
+  const ms=(s.msgs||[]).map((m,k)=>`<div class="m ${m.f}"${k<keep&&prev&&!prev.board?' style="animation:none"':''}>${m.t}${(m.opts||[]).map(o=>`<span class="opt">${o}</span>`).join('')}</div>`).join('');
+  return `<div class="p-status"><span>9:41</span><span>●●●</span></div>
+   <div class="p-head">${AG}<span><b>Shopping agent</b><span>AI assistant</span></span></div>
+   <div class="p-msgs">${ms}</div>
+   <div class="p-input"><span class="txt ${s.typing?'':'ph'}" id="ptxt">${s.typing?'':'Message'}</span><span class="send"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg></span></div>`;
+}
+function render(){
+  const s=S[i], prev=prevI>=0?S[prevI]:null; prevI=i;
+  const tag=s.tag?`<span class="tag ${s.tag.k}">${s.tag.k==='with'?H:''}${s.tag.t}</span>`:'';
+  $('cap').innerHTML=`<div class="anim">${tag}<h1>${s.cap}</h1></div>`;
+  if(typer){clearInterval(typer);typer=null}
+  if(s.board){
+    $('vis').innerHTML=`<div class="board">${BOARDS[s.board]}</div>`;
+  }else{
+    const b=s.b, url=b.url||URL;
+    const state=b.prot?`<span class="b-state">${H}Protected by HUMAN</span>`:`<span class="b-state">No agent visibility</span>`;
+    $('vis').innerHTML=`<div class="split" data-focus="${s.focus}"><div class="phone-col"><div class="phone">${phoneHTML(s,prev)}</div></div>
+      <div class="browser-col"><div class="browser"><div class="b-chrome"><span class="b-dots"><i></i><i></i><i></i></span><span class="b-url">${url}</span>${state}</div>
+      <div class="b-page"><div class="pg">${PAGES[b.page](b)}${b.captcha?CAPTCHA:''}${b.hold?HOLD:''}</div></div></div>${s.panel?PANELS[s.panel]:''}</div></div>`;
+    if(s.typing){const el=$('ptxt');
+      if(reduce){el.innerHTML=s.typing}
+      else{let n=0;typer=setInterval(()=>{n++;el.innerHTML=s.typing.slice(0,n)+'<span class="caret"></span>';if(n>=s.typing.length){clearInterval(typer);typer=null}},Math.min(55,(s.dur-2500)/s.typing.length))}}
+  }
+  $('tl').innerHTML=S.map((x,k)=>`<button class="${k<i?'past':k===i?'cur':''}" aria-label="Scene ${k+1}" data-k="${k}"><i><b style="animation-duration:${x.dur}ms"></b></i></button>`).join('');
+  $('tl').classList.toggle('paused',!playing);
+  $('tl').querySelectorAll('button').forEach(bt=>bt.onclick=()=>{pause();go(+bt.dataset.k)});
+  schedule();
+}
+function schedule(){clearTimeout(timer); if(playing) timer=setTimeout(()=>go((i+1)%S.length),S[i].dur)}
+function go(k){i=(k+S.length)%S.length; if(i===0) prevI=-1; render()}
+const PLAY='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>', PAUSE='<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>';
+function setBtn(){$('bPlay').innerHTML=playing?PAUSE:PLAY;$('bPlay').setAttribute('aria-label',playing?'Pause':'Play')}
+function pause(){playing=false;clearTimeout(timer);setBtn();$('tl').classList.add('paused')}
+function play(){playing=true;setBtn();render()}
+$('bPlay').onclick=()=>playing?pause():play();
+$('bNext').onclick=()=>{pause();go(i+1)};
+$('bPrev').onclick=()=>{pause();go(i-1)};
+document.addEventListener('keydown',e=>{
+  if(e.metaKey||e.ctrlKey||e.altKey) return;
+  if(e.key==='ArrowRight'){e.preventDefault();pause();go(i+1)}
+  else if(e.key==='ArrowLeft'){e.preventDefault();pause();go(i-1)}
+  else if(e.key===' '){e.preventDefault();playing?pause():play()}
+});
+document.addEventListener('visibilitychange',()=>{ if(document.hidden&&playing){clearTimeout(timer)} else if(!document.hidden&&playing){render()} });
+if(location.hash==='#embed') document.body.classList.add('embed');
+setBtn(); render();
+})();
+</script>
+
+</body>
+</html>
